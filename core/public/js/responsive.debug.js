@@ -1,0 +1,1 @@
+var Zb=m.matchMedia||m.msMatchMedia,$b={};function Na(a){if(!Zb||!a)return!0;a in $b||($b[a]=Zb(a));return $b[a]}function Pa(a,c,b){function d(f){f.matches?(b||$b[a].removeListener(d),e||(e=!0,c())):f.matches||(b&&!0===e&&b(),e=!1)}var e=!Zb||!a||Na(a).matches;e&&c();b&&$b&&a in $b&&$b[a].addListener(d)}z.media=Pa;
