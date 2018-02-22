@@ -10,7 +10,7 @@ Documentation is available [here](https://github.com/o10n-x/wordpress-javascript
 
 This plugin is a toolkit for professional Javascript optimization.
 
-The plugin provides in a complete solution for Javascript code optimization and delivery optimization (async loading, timed execution).
+The plugin provides in a complete solution for code optimization and delivery optimization (minify, concat/merge (with groups), async loading, timed execution and more).
 
 The plugin provides many unique innovations including timed script downloading and/or execution based on `requestAnimationFrame` with frame target, `requestIdleCallback`, element scrolled into view or a Media Query.
 
