@@ -340,10 +340,10 @@ class Js extends Controller implements Controller_Interface
                         $concat_group_settings[$concat_group]['async'] = $this->options->bool('js.async');
 
                         // apply async filter
-                        if (!empty($this->async_filterConcat)) {
+                        if (!empty($this->async_filter)) {
 
                             // apply filter to key
-                            $asyncConfig = $this->tools->filter_config_match($concat_group_key, $this->async_filterConcat, $this->async_filterType);
+                            $asyncConfig = $this->tools->filter_config_match($concat_group_key, $this->async_filter, $this->async_filterType);
 
                             // filter config object
                             if ($asyncConfig && is_array($asyncConfig)) {
@@ -1170,14 +1170,7 @@ class Js extends Controller implements Controller_Interface
             if (empty($this->async_filter)) {
                 $this->async_filter = false;
             } else {
-                $this->async_filterConcat = array_filter($this->async_filter, function ($filter) {
-                    return (isset($filter['match_concat']));
-                });
-                if (!empty($this->async_filterConcat)) {
-                    $this->async_filter = array_filter($this->async_filter, function ($filter) {
-                        return (!isset($filter['match_concat']));
-                    });
-                }
+                //
             }
         } else {
             $this->async_filter = false;

@@ -50,7 +50,6 @@ $this->form_start(__('Javascript Delivery Optimization', 'optimization'), 'js');
             <p class="description">Enter a JSON array with objects. (<a href="javascript:void(0);" onclick="jQuery('#concat_group_example').fadeToggle();">show example</a>)</p>
             <div class="info_yellow" id="concat_group_example" style="display:none;"><strong>Example:</strong> <pre class="clickselect" title="<?php print esc_attr('Click to select', 'optimization'); ?>" style="cursor:copy;padding: 10px;margin: 0 1px;margin-top:5px;font-size: 13px;">{
     "match": "/concat-group-(x|y)/",
-    "match_concat": true,
     "regex": true,
     "async": true,
     "rel_preload": true,

@@ -49,13 +49,6 @@
                                 "type": "string",
                                 "minLength": 1
                             },
-                            "match_concat": {
-                                "title": "Match concatenation group key.",
-                                "type": "boolean",
-                                "enum": [
-                                    true
-                                ]
-                            },
                             "regex": {
                                 "title": "Use regular expression match",
                                 "type": "boolean",
