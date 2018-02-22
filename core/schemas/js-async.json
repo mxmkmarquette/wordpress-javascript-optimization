@@ -119,11 +119,6 @@
                                 "type": "boolean",
                                 "default": false
                             },
-                            "noscript": {
-                                "title": "Add fallback script via <noscript>",
-                                "type": "boolean",
-                                "default": false
-                            },
                             "load_position": {
                                 "title": "Load position of scripts",
                                 "type": "string",
@@ -313,7 +308,7 @@
                         "default": "inview"
                     },
                     "selector": {
-                    "title": "CSS selector",
+                        "title": "CSS selector",
                         "type": "string",
                         "minLength": 1
                     },

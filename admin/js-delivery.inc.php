@@ -54,7 +54,6 @@ $this->form_start(__('Javascript Delivery Optimization', 'optimization'), 'js');
     "regex": true,
     "async": true,
     "rel_preload": true,
-    "noscript": false,
     "load_position": "timing",
     "load_timing": {
         "type": "media",

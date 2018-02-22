@@ -78,6 +78,11 @@
                                 "type": "boolean",
                                 "default": false
                             },
+                            "noscript": {
+                                "title": "Add fallback stylesheets via <noscript>",
+                                "type": "boolean",
+                                "default": false
+                            },
                             "load_position": {
                                 "title": "Load position of CSS",
                                 "type": "string",
