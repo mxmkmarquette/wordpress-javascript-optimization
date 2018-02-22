@@ -32,7 +32,7 @@ $module_version = $view->module->version();
 
 			<p class="about-text" style="min-height:inherit;">Getting started? Read <a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/javascript-startup-optimization/" target="_blank">this article</a> about Javascript optimization by Google.</p>
 
-			<p class="about-text" style="min-height:inherit;">If you are happy with the plugin, please consider to <a href="https://wordpress.org/support/plugin/js-optimization/reviews/#new-post" target="_blank" rel="noopener">write a review</a> and <span class="star" style="display:inline-block;vertical-align:middle;"><a class="github-button" data-manual="1" data-size="large" href="https://github.com/o10n-x/wordpress-js-optimization" data-icon="octicon-star" data-show-count="true" aria-label="Star o10n-x/wordpress-js-optimization on GitHub">Star</a></span> on Github.</p>
+			<p class="about-text" style="min-height:inherit;">If you are happy with the plugin, please consider to <a href="https://wordpress.org/support/plugin/javascript-optimization/reviews/#new-post" target="_blank" rel="noopener">write a review</a> and <span class="star" style="display:inline-block;vertical-align:middle;"><a class="github-button" data-manual="1" data-size="large" href="https://github.com/o10n-x/wordpress-javascript-optimization" data-icon="octicon-star" data-show-count="true" aria-label="Star o10n-x/wordpress-javascript-optimization on GitHub">Star</a></span> on Github.</p>
 			</div>
 
 		</div>

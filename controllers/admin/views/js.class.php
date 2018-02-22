@@ -58,6 +58,21 @@ class AdminViewJs extends AdminViewBase
     }
 
     /**
+     * Return help tab data
+     */
+    final public function help_tab()
+    {
+        $data = array(
+            'name' => __('Javascript Optimization', 'o10n'),
+            'github' => 'https://github.com/o10n-x/wordpress-javascript-optimization',
+            'wordpress' => 'https://wordpress.org/support/plugin/javascript-optimization',
+            'docs' => 'https://github.com/o10n-x/wordpress-javascript-optimization/tree/master/docs'
+        );
+
+        return $data;
+    }
+
+    /**
      * Enqueue scripts and styles
      */
     final public function enqueue_scripts()
