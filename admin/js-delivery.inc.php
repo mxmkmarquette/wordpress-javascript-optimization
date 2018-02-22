@@ -29,7 +29,7 @@ $this->form_start(__('Javascript Delivery Optimization', 'optimization'), 'js');
                 <label><input type="checkbox" name="o10n[js.async.rel_preload]" value="1"<?php $checked('js.async.rel_preload'); ?> /> Load scripts via <code>&lt;link rel="preload" as="script"&gt;</code> (<a href="https://www.w3.org/TR/preload/" target="_blank">W3C Spec</a>) to enable responsive script loading and async script execution.</label>
             </div>
 
-            <div style="margin-top:5px;" data-ns="js.async"<?php $visible('js.async');  ?>>
+            <div class="suboption" style="margin-top:5px;" data-ns="js.async"<?php $visible('js.async');  ?>>
                 <label><input type="checkbox" value="1" name="o10n[js.async.filter.enabled]" data-json-ns="1"<?php $checked('js.async.filter.enabled'); ?> /> Enable config filter</label>
                 <span data-ns="js.async.filter"<?php $visible('js.async.filter'); ?>>
                     <select name="o10n[js.async.filter.type]" data-ns-change="js.async.filter" data-json-default="<?php print esc_attr(json_encode('include')); ?>">
@@ -37,6 +37,7 @@ $this->form_start(__('Javascript Delivery Optimization', 'optimization'), 'js');
                         <option value="exclude"<?php $selected('js.async.filter.type', 'exclude'); ?>>Exclude by default</option>
                     </select>
                 </span>
+                <p class="description">The config filter enables to include or exclude scripts from async loading or to apply custom async load configuration to individual files or concat groups.</p>
             </div>
         </td>
     </tr>
