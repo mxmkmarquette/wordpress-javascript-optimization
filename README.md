@@ -18,7 +18,7 @@ The plugin enables to download and/or execute scripts based on a Media Query or 
 
 With debug modus enabled, the browser console will show detailed information about the Javascript loading and execution process including a [Performance API](https://developer.mozilla.org/nl/docs/Web/API/Performance) result for an insight in the Javascript loading performance of any given configuration.
 
-The plugin contains an advanced Javascript editor with ES Lint, UglifyJS code optimization and a Javascript Beautifier. The editor can be personalized with more than 30 themes.
+The plugin contains an advanced Javascript editor with ES Lint, UglifyJS code optimization and a Javascript beautifier. The editor can be personalized with more than 30 themes.
 
 ![Advanced Javascript Editor](https://github.com/o10n-x/wordpress-javascript-optimization/blob/master/docs/images/js-editor.png)
 
