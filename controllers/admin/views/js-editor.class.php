@@ -78,9 +78,9 @@ class AdminViewJsEditor extends AdminViewBase
     {
         $data = array(
             'name' => __('Javascript Editor', 'o10n'),
-            'github' => 'https://github.com/o10n-x/wordpress-js-optimization',
-            'wordpress' => 'https://wordpress.org/support/plugin/js-optimization',
-            'docs' => 'https://github.com/o10n-x/wordpress-js-optimization/tree/master/docs'
+            'github' => 'https://github.com/o10n-x/wordpress-javascript-optimization',
+            'wordpress' => 'https://wordpress.org/support/plugin/javascript-optimization',
+            'docs' => 'https://github.com/o10n-x/wordpress-javascript-optimization/tree/master/docs'
         );
 
         return $data;

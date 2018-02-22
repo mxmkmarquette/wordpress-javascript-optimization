@@ -36,7 +36,7 @@ class Js extends Controller implements Controller_Interface
     // load/render position
     private $load_position;
     private $rel_preload = false; // default rel="preload"
-    private $async_exec = false; // default async exec
+    private $exec_timing = false; // default async exec
 
     private $async_filter; // filter for scripts
     private $async_filterConcat; // filter for concat groups
@@ -166,8 +166,8 @@ class Js extends Controller implements Controller_Interface
 
                 // async exec (default)
                 if ($this->options->bool('js.async.exec')) {
-                    $this->async_exec = $this->options->get('js.async.exec.*');
-                    switch ($this->async_exec['type']) {
+                    $this->exec_timing = $this->options->get('js.async.exec.*');
+                    switch ($this->exec_timing['type']) {
                         case "domReady":
                             $keys = array();
                         break;
@@ -192,14 +192,14 @@ class Js extends Controller implements Controller_Interface
                             $keys = array('media' => 'JSONKEY');
                         break;
                     }
-                    $async_exec_config = $this->client->config_array_data($this->async_exec, $keys);
-                    if (!empty($async_exec_config)) {
-                        $this->client->set_config('js', 'async_exec', array(
-                            $this->client->config_index('jsonkey_'.$this->async_exec['type']),
-                            $async_exec_config
+                    $exec_timing_config = $this->client->config_array_data($this->exec_timing, $keys);
+                    if (!empty($exec_timing_config)) {
+                        $this->client->set_config('js', 'exec_timing', array(
+                            $this->client->config_index('jsonkey_'.$this->exec_timing['type']),
+                            $exec_timing_config
                         ));
                     } else {
-                        $this->client->set_config('js', 'async_exec', $this->client->config_index('jsonkey_'.$this->async_exec['type']));
+                        $this->client->set_config('js', 'exec_timing', $this->client->config_index('jsonkey_'.$this->exec_timing['type']));
                     }
                 }
                 
@@ -357,14 +357,14 @@ class Js extends Controller implements Controller_Interface
                                         $concat_group_settings[$concat_group]['load_position'] = $asyncConfig['load_position'];
                                     }
 
-                                    // async exec
-                                    if (isset($asyncConfig['async_exec'])) {
-                                        $concat_group_settings[$concat_group]['async_exec'] = $asyncConfig['async_exec'];
+                                    // load timing
+                                    if (isset($asyncConfig['load_position']) && $asyncConfig['load_position'] === 'timing' && isset($asyncConfig['load_timing'])) {
+                                        $concat_group_settings[$concat_group]['load_timing'] = $asyncConfig['load_timing'];
                                     }
 
-                                    // abide dependencies
-                                    if (isset($asyncConfig['abide'])) {
-                                        $concat_group_settings[$concat_group]['abide'] = $asyncConfig['abide'];
+                                    // async exec
+                                    if (isset($asyncConfig['exec_timing'])) {
+                                        $concat_group_settings[$concat_group]['exec_timing'] = $asyncConfig['exec_timing'];
                                     }
 
                                     // try catch
@@ -400,8 +400,6 @@ class Js extends Controller implements Controller_Interface
                         }
                     }
 
-                    $async_exec = (isset($script['async_exec'])) ? $script['async_exec'] : null;
-
                     // inline <style>
                     if (isset($script['inline'])) {
                         $hash = md5($script['text']);
@@ -411,7 +409,6 @@ class Js extends Controller implements Controller_Interface
                             'cache_hash' => $hash,
                             'tag' => $script['tag'],
                             'text' => $script['text'],
-                            'async_exec' => $async_exec,
                             'position' => count($async_scripts),
                             'element' => $script
                         );
@@ -422,7 +419,6 @@ class Js extends Controller implements Controller_Interface
                             'cache_hash' => $script['minified'][0],
                             'tag' => $script['tag'],
                             'src' => $script['src'],
-                            'async_exec' => $async_exec,
                             'position' => count($async_scripts),
                             'element' => $script
                         );
@@ -450,10 +446,10 @@ class Js extends Controller implements Controller_Interface
             if ($async && $script['async']) {
                 
                 // config
-                $load_position = (isset($script['load_position'])) ? $script['load_position'] : $this->load_position;
                 $rel_preload = (isset($script['rel_preload'])) ? $script['rel_preload'] : $this->rel_preload;
-                $async_exec = (isset($script['async_exec'])) ? $script['async_exec'] : null;
-                $abide = (isset($script['abide'])) ? $script['abide'] : false;
+                $load_position = (isset($script['load_position'])) ? $script['load_position'] : $this->load_position;
+                $load_timing = (isset($script['load_timing'])) ? $script['load_timing'] : $this->load_timing;
+                $exec_timing = (isset($script['exec_timing'])) ? $script['exec_timing'] : $this->exec_timing;
 
                 // minified script
                 if (isset($script['minified']) && $script['minified']) {
@@ -494,8 +490,8 @@ class Js extends Controller implements Controller_Interface
                     'url' => $script_hash,
                     'original_url' => $script['src'],
                     'load_position' => $load_position,
-                    'async_exec' => $async_exec,
-                    'abide' => $abide
+                    'load_timing' => $load_timing,
+                    'exec_timing' => $exec_timing
                 );
                 if (isset($script['localStorage'])) {
                     $async_script['localStorage'] = $script['localStorage'];
@@ -510,8 +506,8 @@ class Js extends Controller implements Controller_Interface
                         'url' => $script_url,
                         'rel_preload' => $rel_preload,
                         'load_position' => $load_position,
-                        'async_exec' => $async_exec,
-                        'abide' => $abide
+                        'load_timing' => $load_timing,
+                        'exec_timing' => $exec_timing
                     );
                 } else {
                     $script_urls[] = false;
@@ -594,16 +590,16 @@ class Js extends Controller implements Controller_Interface
                             $contact_original_urls[] = $script['src'];
                         }
 
-                        if (isset($script['async_exec']) && $script['async_exec']) {
-                            switch ($script['async_exec']['type']) {
+                        if (isset($script['exec_timing']) && $script['exec_timing']) {
+                            switch ($script['exec_timing']['type']) {
                                 case "inview":
-                                    if (isset($script['async_exec']['selector'])) {
+                                    if (isset($script['exec_timing']['selector'])) {
                                         // load inview module
                                         $this->client->load_module('inview');
                                     }
                                 break;
                                 case "media":
-                                    if (isset($script['async_exec']['selector'])) {
+                                    if (isset($script['exec_timing']['selector'])) {
                                         // load responsive module
                                         $this->client->load_module('responsive');
                                     }
@@ -635,38 +631,38 @@ class Js extends Controller implements Controller_Interface
                             continue 1;
                         }
 
-                        if (isset($script['async_exec']) && $script['async_exec']) {
-                            switch ($script['async_exec']['type']) {
+                        if (isset($script['exec_timing']) && $script['exec_timing']) {
+                            switch ($script['exec_timing']['type']) {
                                 case "domReady":
                                     $source = 'o10n.ready(function(){' . $source . '});';
                                 break;
                                 case "requestAnimationFrame":
-                                    $frame = (isset($script['async_exec']['frame'])) ? $script['async_exec']['frame'] : 1;
+                                    $frame = (isset($script['exec_timing']['frame'])) ? $script['exec_timing']['frame'] : 1;
                                     $source = 'o10n.raf(function(){' . $source . '},'.$frame.');';
                                 break;
                                 case "requestIdleCallback":
-                                    $timeout = (isset($script['async_exec']['timeout'])) ? $script['async_exec']['timeout'] : 'false';
-                                    $setTimeout = (isset($script['async_exec']['setTimeout'])) ? $script['async_exec']['setTimeout'] : 'false';
+                                    $timeout = (isset($script['exec_timing']['timeout'])) ? $script['exec_timing']['timeout'] : 'false';
+                                    $setTimeout = (isset($script['exec_timing']['setTimeout'])) ? $script['exec_timing']['setTimeout'] : 'false';
                                     $source = 'o10n.idle(function(){' . $source . '},'.$timeout.','.$setTimeout.');';
                                 break;
                                 case "inview":
-                                    if (isset($script['async_exec']['selector'])) {
-                                        $offset = (isset($script['async_exec']['offset']) && is_numeric($script['async_exec']['offset'])) ? (string)$script['async_exec']['offset'] : 'false';
+                                    if (isset($script['exec_timing']['selector'])) {
+                                        $offset = (isset($script['exec_timing']['offset']) && is_numeric($script['exec_timing']['offset'])) ? (string)$script['exec_timing']['offset'] : 'false';
 
                                         // load inview module
                                         $this->client->load_module('inview');
 
-                                        $source = 'o10n.inview('.json_encode($script['async_exec']['selector']).','.$offset.',function(){' . $source . '});';
+                                        $source = 'o10n.inview('.json_encode($script['exec_timing']['selector']).','.$offset.',function(){' . $source . '});';
                                     }
 
                                 break;
                                 case "media":
-                                    if (isset($script['async_exec']['media'])) {
+                                    if (isset($script['exec_timing']['media'])) {
 
                                         // load responsive module
                                         $this->client->load_module('responsive');
 
-                                        $source = 'o10n.media('.json_encode($script['async_exec']['media']).',function(){' . $source . '});';
+                                        $source = 'o10n.media('.json_encode($script['exec_timing']['media']).',function(){' . $source . '});';
                                     }
 
                                 break;
@@ -791,10 +787,10 @@ class Js extends Controller implements Controller_Interface
                 $concat_group_async = (isset($concat_group_settings[$concat_group]['async'])) ? $concat_group_settings[$concat_group]['async'] : $this->options->bool('js.async');
 
                 // config
-                $load_position = (isset($concat_group_settings[$concat_group]['load_position'])) ? $concat_group_settings[$concat_group]['load_position'] : $this->load_position;
                 $rel_preload = (isset($concat_group_settings[$concat_group]['rel_preload'])) ? $concat_group_settings[$concat_group]['rel_preload'] : $this->rel_preload;
-                $async_exec = (isset($concat_group_settings[$concat_group]['async_exec'])) ? $concat_group_settings[$concat_group]['async_exec'] : null;
-                $abide = (isset($concat_group_settings[$concat_group]['abide'])) ? $concat_group_settings[$concat_group]['abide'] : false;
+                $load_position = (isset($concat_group_settings[$concat_group]['load_position'])) ? $concat_group_settings[$concat_group]['load_position'] : $this->load_position;
+                $load_timing = (isset($concat_group_settings[$concat_group]['load_timing'])) ? $concat_group_settings[$concat_group]['load_timing'] : $this->load_timing;
+                $exec_timing = (isset($concat_group_settings[$concat_group]['exec_timing'])) ? $concat_group_settings[$concat_group]['exec_timing'] : $this->exec_timing;
 
                 // load async (concatenated script)
                 if ($concat_group_async) {
@@ -802,11 +798,11 @@ class Js extends Controller implements Controller_Interface
                     // add script to async list
                     $async_script = array(
                         'type' => 'concat',
-                        'url' => $this->async_hash_path('js', $urlhash),
+                        'url' => $this->async_hash_path($urlhash),
                         'original_url' => $contact_original_urls,
                         'load_position' => $load_position,
-                        'async_exec' => $async_exec,
-                        'abide' => $abide
+                        'load_timing' => $load_timing,
+                        'exec_timing' => $exec_timing
                     );
 
                     if (isset($concat_group_settings[$concat_group]['localStorage'])) {
@@ -824,8 +820,8 @@ class Js extends Controller implements Controller_Interface
                             'url' => $this->url_filter($this->cache->url('js', 'concat', $urlhash)),
                             'rel_preload' => $rel_preload,
                             'load_position' => $load_position,
-                            'async_exec' => $async_exec,
-                            'abide' => $abide
+                            'load_timing' => $load_timing,
+                            'exec_timing' => $exec_timing
                         )));
                     }
                 } else {
@@ -867,44 +863,16 @@ class Js extends Controller implements Controller_Interface
                     // load position
                     $load_position = ($script['load_position'] && $script['load_position'] !== $this->load_position) ? $script['load_position'] : false;
                     if ($load_position) {
-                        $load_position = ($load_position === 'footer') ? 1 : 0;
+                        $load_position = ($load_position === 'timing') ? $this->client->config_index('key', 'timing') : 0;
+                    }
+                    if ($script['load_position'] && $script['load_position'] === 'timing') {
+                        $load_timing = ($script['load_timing'] && $script['load_timing'] !== $this->load_timing) ? $script['load_timing'] : false;
+                    } else {
+                        $load_timing = false;
                     }
 
                     // async exec
-                    $async_exec = ($script['async_exec'] && $script['async_exec'] !== $this->async_exec) ? $script['async_exec'] : false;
-                    if ($async_exec) {
-                        switch ($async_exec['type']) {
-                            case "domReady":
-                                $keys = array();
-                            break;
-                            case "requestAnimationFrame":
-                                $keys = array('frame' => 'JSONKEY');
-                            break;
-                            case "requestIdleCallback":
-                                $keys = array('timeout' => 'JSONKEY','setTimeout' => 'JSONKEY');
-                            break;
-                            case "inview":
-
-                                // load inview module
-                                $this->client->load_module('inview');
-
-                                $keys = array('selector' => 'JSONKEY','offset' => 'JSONKEY');
-                            break;
-                            case "media":
-
-                                // load responsive module
-                                $this->client->load_module('inview');
-
-                                $keys = array('media' => 'JSONKEY');
-                            break;
-                        }
-
-                        $async_exec_config = $this->client->config_array_data($async_exec, $keys);
-                        $async_exec = array($this->client->config_index('jsonkey_'.$async_exec['type']));
-                        if (!empty($async_exec_config)) {
-                            $async_exec[] = $async_exec_config;
-                        }
-                    }
+                    $exec_timing = ($sheet['exec_timing'] && $sheet['exec_timing'] !== $this->exec_timing) ? $sheet['exec_timing'] : false;
 
                     // hash type prefix
                     $hash_type_prefix = (isset($hash_type_prefixes[$script['type']])) ? $hash_type_prefixes[$script['type']] : false;
@@ -925,56 +893,37 @@ class Js extends Controller implements Controller_Interface
                     // script URL or hash
                     $async_script[] = $script['url'];
 
-                    // script media
-                    $media_set = $load_set = $async_exec_set = false;
+                    $index = count($async_script);
+                    $async_script[] = null; // load position
+                    $async_script[] = null; // localStorage
 
                     // load config
-                    if ($load_position !== false) {
-                        if (!$media_set) {
-                            $async_script[] = '__O10N_NULL__';
-                            $media_set = true;
+                    if ($load_position !== false || $render_timing !== false) {
+                        if ($render_timing !== false) {
+                            $async_script[$index] = array($load_position, $this->timing_config($load_timing), $this->timing_config($render_timing));
+                        } elseif ($load_timing !== false) {
+                            $async_script[$index] = array($load_position, $this->timing_config($load_timing));
+                        } else {
+                            $async_script[$index] = $load_position;
                         }
-                        $async_script[] = $load_position;
-                        $load_set = true;
-                    }
-
-                    // async exec config
-                    if ($async_exec !== false) {
-                        if (!$media_set) {
-                            $async_script[] = '__O10N_NULL__';
-                            $media_set = true;
-                        }
-                        if (!$load_set) {
-                            $async_script[] = '__O10N_NULL__';
-                            $load_set = true;
-                        }
-                        $async_script[] = $async_exec;
-                        $async_exec_set = true;
                     }
 
                     // custom localStorage config
                     if (isset($script['localStorage'])) {
-                        if (!$media_set) {
-                            $async_script[] = '__O10N_NULL__';
-                            $media_set = true;
-                        }
-                        if (!$load_set) {
-                            $async_script[] = '__O10N_NULL__';
-                            $load_set = true;
-                        }
-                        if (!$async_exec_set) {
-                            $async_script[] = '__O10N_NULL__';
-                            $async_exec_set = true;
-                        }
                         if (is_array($script['localStorage'])) {
-                            $async_script[] = $this->client->config_array_data($script['localStorage'], array(
-                                'max_size' => 'JSONKEY',
-                                'update_interval' => 'JSONKEY',
-                                'head_update' => 'JSONKEY',
-                                'expire' => 'JSONKEY'
-                            ));
+                            $localStorage = array();
+                            $config_keys = array('max_size','expire','update_interval');
+                            foreach ($config_keys as $key) {
+                                $localStorage[$this->client->config_index('js', 'localStorage_'.$key)] = $script['localStorage'][$key];
+                            }
+
+                            if ($script['localStorage']['head_update']) {
+                                $localStorage[$this->client->config_index('js', 'localStorage_head_update')] = $script['localStorage']['head_update'];
+                            }
+
+                            $async_script[($index + 1)] = $localStorage;
                         } else {
-                            $async_script[] = ($script['localStorage']) ? 1 : 0;
+                            $async_script[($index + 1)] = ($script['localStorage']) ? 1 : 0;
                         }
                     }
 
@@ -1013,17 +962,17 @@ class Js extends Controller implements Controller_Interface
 
             // rel="preload" as="script"
             if (isset($script['rel_preload']) && $script['rel_preload']) {
-                if (isset($script['async_exec']) && !is_null($script['async_exec'])) {
-                    $async_exec = $script['async_exec'];
+                if (isset($script['exec_timing']) && !is_null($script['exec_timing'])) {
+                    $exec_timing = $script['exec_timing'];
                 } else {
-                    $async_exec = $this->async_exec;
+                    $exec_timing = $this->exec_timing;
                 }
 
                 // position in document
                 $position = ($script['load_position'] === 'footer') ? 'footer' : 'critical-css';
 
-                if ($async_exec && $async_exec['type'] === 'media' && isset($async_exec['media'])) {
-                    $media = $async_exec['media'];
+                if ($exec_timing && $exec_timing['type'] === 'media' && isset($exec_timing['media'])) {
+                    $media = $exec_timing['media'];
                 } else {
                     $media = false;
                 }
@@ -1359,19 +1308,18 @@ class Js extends Controller implements Controller_Interface
                                 $script['load_position'] = $asyncConfig['load_position'];
                             }
 
+                            if (isset($asyncConfig['load_position']) && $asyncConfig['load_position'] === 'timing' && isset($asyncConfig['load_timing'])) {
+                                $script['load_timing'] = $asyncConfig['load_timing'];
+                            }
+
                             // custom async exec
-                            if (isset($asyncConfig['async_exec'])) {
-                                $script['async_exec'] = $asyncConfig['async_exec'];
+                            if (isset($asyncConfig['exec_timing'])) {
+                                $script['exec_timing'] = $asyncConfig['exec_timing'];
                             }
 
                             // custom rel_preload
                             if (isset($asyncConfig['rel_preload']) && $asyncConfig['rel_preload'] !== $this->rel_preload) {
                                 $script['rel_preload'] = $asyncConfig['rel_preload'];
-                            }
-
-                            // custom abide WordPress dependencies
-                            if (isset($asyncConfig['abide'])) {
-                                $script['abide'] = $asyncConfig['abide'];
                             }
 
                             // custom localStorage
