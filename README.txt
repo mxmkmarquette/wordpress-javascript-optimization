@@ -42,6 +42,10 @@ Documentation is available on [Github](https://github.com/o10n-x/wordpress-css-o
 
 == Screenshots ==
 
+= 0.0.3 =
+
+Added: cache management in admin menu.
+
 = 0.0.2 = 
 
 Bugfix/improvement: Async Config Filter load and render timing.

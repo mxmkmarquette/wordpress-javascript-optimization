@@ -7,12 +7,12 @@ namespace O10n;
  * Advanced Javascript optimization toolkit. Minify, concat/merge, async loading, advanced editor, ES Lint, UglifyJS (professional), beautifier and more.
  *
  * @link              https://github.com/o10n-x/
- * @package           o10n
+ * @package    optimization
  *
  * @wordpress-plugin
  * Plugin Name:       Javascript Optimization
  * Description:       Advanced Javascript optimization toolkit. Minify, concat/merge, async loading, advanced editor, ES Lint, UglifyJS (professional), beautifier and more.
- * Version:           0.0.2
+ * Version:           0.0.3
  * Author:            Optimization.Team
  * Author URI:        https://optimization.team/
  * Text Domain:       o10n
@@ -29,8 +29,8 @@ if (defined('WP_INSTALLING') && WP_INSTALLING) {
 }
 
 // settings
-$module_version = '0.0.2';
-$minimum_core_version = '0.0.6';
+$module_version = '0.0.3';
+$minimum_core_version = '0.0.7';
 $plugin_path = dirname(__FILE__);
 
 // load the optimization module loader
@@ -47,7 +47,6 @@ new Module(
     array(
         'core' => array(
             'http',
-            'shutdown',
             'client',
             'proxy',
             'tools',
@@ -61,7 +60,7 @@ new Module(
             'AdminGlobaljs'
         )
     ),
-    2,
+    3,
     array(
         'src' => array(
             'path' => 'js/src/',
