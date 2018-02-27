@@ -382,6 +382,10 @@ submit_button(__('Save'), 'primary large', 'is_submit', false);
         </td>
     </tr>
 </table>
+
+<p class="suboption info_yellow"><strong><span class="dashicons dashicons-lightbulb"></span></strong> You can enable debug modus by adding <code>define('O10N_DEBUG', true);</code> to wp-config.php. The browser console will show details about javascript loading and a <a href="https://developer.mozilla.org/nl/docs/Web/API/Performance" target="_blank" rel="noopener">Performance API</a> result for each step of the loading and execution process.</p>
+
+
 <hr />
 <?php
     submit_button(__('Save'), 'primary large', 'is_submit', false);
