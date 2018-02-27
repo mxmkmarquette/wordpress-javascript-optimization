@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/o10n-x/wordpress-javascript-optimization.svg?branch=master)](https://travis-ci.org/o10n-x/wordpress-javascript-optimization)
+
 # WordPress Javascript Optimization
 
 Advanced Javascript optimization toolkit. Minify, concat/merge, async loading, advanced editor, ES Lint, UglifyJS (professional), beautifier and more.
