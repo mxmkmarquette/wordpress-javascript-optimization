@@ -19,7 +19,7 @@ $this->form_start(__('Javascript Delivery Optimization', 'optimization'), 'js');
 
 <table class="form-table">
     <tr valign="top" >
-        <th scope="row">Async Loading <a href="https://developers.google.com/speed/docs/insights/OptimizeCSSDelivery?hl=" target="_blank" title="Recommendations by Google"><span class="dashicons dashicons-editor-help"></span></a></th>
+        <th scope="row">Async Loading</th>
         <td>
             <p class="poweredby">Powered by <a href="https://github.com/walmartlabs/little-loader" target="_blank">little-loader</a><span class="star"><a class="github-button" data-manual="1" href="https://github.com/walmartlabs/little-loader" data-icon="octicon-star" data-show-count="true" aria-label="Star walmartlabs/little-loader on GitHub">Star</a></span></p> 
             <label><input type="checkbox" name="o10n[js.async.enabled]" data-json-ns="1" value="1"<?php $checked('js.async.enabled'); ?> /> Enabled</label>

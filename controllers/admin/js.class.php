@@ -16,7 +16,7 @@ class AdminJs extends ModuleAdminController implements Module_Admin_Controller_I
 {
 
     // admin base
-    protected $admin_base = 'themes.php';
+    protected $admin_base = 'tools.php';
 
     // tab menu
     protected $tabs = array(
@@ -87,8 +87,29 @@ class AdminJs extends ModuleAdminController implements Module_Admin_Controller_I
 
         // reorder menu
         add_filter('custom_menu_order', array($this, 'reorder_menu'), PHP_INT_MAX);
+      
+        // enqueue scripts
+        add_action('admin_enqueue_scripts', array( $this, 'enqueue_scripts' ), $this->first_priority);
     }
     
+
+    /**
+     * Enqueue scripts and styles
+     */
+    final public function enqueue_scripts()
+    {
+        // skip if user is not logged in
+        if (!is_admin() || !is_user_logged_in()) {
+            return;
+        }
+
+        $module_url = $this->core->modules('js')->dir_url();
+
+        // preload menu icon?>
+<link rel="preload" href="<?php print $module_url; ?>admin/images/js-logo.svg" as="image" type="image/svg+xml" />
+<?php
+    }
+
     /**
      * Admin menu option
      */
@@ -108,7 +129,7 @@ class AdminJs extends ModuleAdminController implements Module_Admin_Controller_I
         } else {
 
             // add menu entry to themes page
-            add_submenu_page('themes.php', __('Javascript Optimization', 'o10n'), __('Javascript Optimization', 'o10n'), 'manage_options', 'o10n-js', array(
+            add_submenu_page('tools.php', __('Javascript Optimization', 'o10n'), __('Javascript Optimization', 'o10n'), 'manage_options', 'o10n-js', array(
                  &$this->AdminView,
                  'display'
              ));

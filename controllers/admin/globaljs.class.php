@@ -82,8 +82,8 @@ class AdminGlobaljs extends ModuleAdminController implements Module_Admin_Contro
         } else {
             $admin_bar->add_menu(array(
                 'id' => 'o10n-js',
-                'title' => '<span class="ab-label">' . __('JS', 'o10n') . '</span>',
-                'href' => add_query_arg(array( 'page' => 'o10n-js' ), admin_url('themes.php')),
+                'title' => '<span class="ab-label"><img src="' . $this->core->modules('js')->dir_url() . 'admin/images/js-logo.svg" style="width:16px;height:16px;margin-top:-2px;" align="absmiddle" alt="Javascript"></span>',
+                'href' => add_query_arg(array( 'page' => 'o10n-js' ), admin_url('tools.php')),
                 'meta' => array( 'title' => __('Javascript Optimization', 'o10n'), 'class' => 'ab-sub-secondary' )
             ));
 
