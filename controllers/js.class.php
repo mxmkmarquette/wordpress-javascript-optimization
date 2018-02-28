@@ -83,12 +83,12 @@ class Js extends Controller implements Controller_Interface
 
         // extract scripts for processing?
         if ($this->options->bool(['js.minify','js.async','js.proxy'])) {
-
+            
             // add script optimization client module
             $this->client->load_module('js', O10N_CORE_VERSION, $this->core->modules('js')->dir_path());
 
             // async loading
-            if ($this->options->bool('js.async')) {
+            if ($this->options->bool('js.async.enabled')) {
                 $this->client->set_config('js', 'async', true);
 
                 // jQuery stub
@@ -103,12 +103,13 @@ class Js extends Controller implements Controller_Interface
                 }
 
                 // async download position
-                $this->load_position = ($this->options->get('js.async.load_position') === 'timed') ? 'timed' : 'header';
-                if ($this->load_position === 'timed') {
+                $this->load_position = ($this->options->get('js.async.load_position') === 'timing') ? 'timing' : 'header';
+
+                if ($this->load_position === 'timing') {
                     
                     // add timed exec module
                     $this->client->load_module('timed-exec');
-
+                  
                     // set load position
                     $this->client->set_config('js', 'load_position', $this->client->config_index('key', 'timing'));
 
@@ -827,7 +828,7 @@ class Js extends Controller implements Controller_Interface
                 } else {
                     
                     // position in document
-                    $position = ($load_position === 'footer') ? 'footer' : 'client';
+                    $position = 'client';
 
                     // concat URL
                     $script_url = $this->url_filter($this->cache->url('js', 'concat', $urlhash));
@@ -895,17 +896,21 @@ class Js extends Controller implements Controller_Interface
 
                     $index = count($async_script);
                     $async_script[] = null; // load position
+                    $async_script[] = null; // render timing
                     $async_script[] = null; // localStorage
 
                     // load config
-                    if ($load_position !== false || $render_timing !== false) {
-                        if ($render_timing !== false) {
-                            $async_script[$index] = array($load_position, $this->timing_config($load_timing), $this->timing_config($render_timing));
-                        } elseif ($load_timing !== false) {
+                    if ($load_position) {
+                        if ($load_timing) {
                             $async_script[$index] = array($load_position, $this->timing_config($load_timing));
                         } else {
                             $async_script[$index] = $load_position;
                         }
+                    }
+
+                    // render config
+                    if ($render_timing) {
+                        $async_script[($index + 1)] = $this->timing_config($render_timing);
                     }
 
                     // custom localStorage config
@@ -921,9 +926,9 @@ class Js extends Controller implements Controller_Interface
                                 $localStorage[$this->client->config_index('js', 'localStorage_head_update')] = $script['localStorage']['head_update'];
                             }
 
-                            $async_script[($index + 1)] = $localStorage;
+                            $async_script[($index + 2)] = $localStorage;
                         } else {
-                            $async_script[($index + 1)] = ($script['localStorage']) ? 1 : 0;
+                            $async_script[($index + 2)] = ($script['localStorage']) ? 1 : 0;
                         }
                     }
 

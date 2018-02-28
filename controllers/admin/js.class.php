@@ -37,10 +37,6 @@ class AdminJs extends ModuleAdminController implements Module_Admin_Controller_I
             'admin_base' => 'themes.php',
             'pagekey' => 'js-editor',
             'subtabs' => array(
-                'lint' => array(
-                    'title' => 'ES Lint',
-                    'href' => '#eslint'
-                ),
                 'minify' => array(
                     'title' => 'Minify',
                     'href' => '#minify'
@@ -48,6 +44,10 @@ class AdminJs extends ModuleAdminController implements Module_Admin_Controller_I
                 'beautify' => array(
                     'title' => 'Beautify',
                     'href' => '#beautify'
+                ),
+                'lint' => array(
+                    'title' => 'ES Lint',
+                    'href' => '#eslint'
                 )
             )
         )

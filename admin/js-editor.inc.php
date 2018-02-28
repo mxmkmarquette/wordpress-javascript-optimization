@@ -85,7 +85,7 @@ $active_script = $view->active_script();
 
                 <h3 style="margin-bottom:0px;" id="eslint"><span class="eslint-logo"><span></span>ESLint</span></h3>
 
-                <p class="description">Verify the quality and performance of the Javascript using <a href="https://eslint.org/" target="_blank">ESLint</a>.</p>
+                <p class="description">Verify the quality and performance of the Javascript code using <a href="https://eslint.org/" target="_blank">ESLint</a>.</p>
 
                 <div class="advanced-options" data-json-advanced="custom">
                     <table class="advanced-options-table widefat fixed striped">
