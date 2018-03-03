@@ -5,7 +5,7 @@ Tags: css, critical css, async, minify, editor, concat, minifier, concatenation,
 Requires at least: 4.0
 Requires PHP: 5.4
 Tested up to: 4.9.4
-Stable tag: 0.0.9
+Stable tag: 0.0.10
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,11 +42,12 @@ Documentation is available on [Github](https://github.com/o10n-x/wordpress-css-o
 
 == Screenshots ==
 
-= 0.0.9 =
+Bugfix: Timed loading/exec not working on iphone when using localStorage.
+
+= 0.0.10 =
 Core update (see changelog.txt)
 
 = 0.0.7 =
-
 Bugfix: timed render not configured correctly (this plugin is a prototype copied partly from the CSS optimization plugin, the client should now perform correctly).
 
 = 0.0.3 =
