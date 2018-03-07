@@ -160,7 +160,7 @@ class AdminJs extends ModuleAdminController implements Module_Admin_Controller_I
     /**
      * Show row meta on the plugin screen.
      */
-    public static function plugin_row_meta($links, $file)
+    final public function plugin_row_meta($links, $file)
     {
         if ($file == $this->core->modules('js')->basename()) {
             $lgcode = strtolower(get_locale());
