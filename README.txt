@@ -1,11 +1,11 @@
-=== JS Optimization ===
+=== Javascript Optimization ===
 Contributors: o10n
 Donate link: https://github.com/o10n-x/
-Tags: css, critical css, async, minify, editor, concat, minifier, concatenation, optimization, optimize, combine, merge, cache
+Tags: javascript, minify, async, uglifyjs, concat, beautify, js, compress, compressor, optimizer, code optimization, beautifier, merge, concatenation, lint
 Requires at least: 4.0
 Requires PHP: 5.4
 Tested up to: 4.9.4
-Stable tag: 0.0.11
+Stable tag: 0.0.13
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,7 +35,7 @@ Documentation is available on [Github](https://github.com/o10n-x/wordpress-javas
 
 ### WordPress plugin installation
 
-1. Upload the `js-optimization/` directory to the `/wp-content/plugins/` directory.
+1. Upload the `javascript-optimization/` directory to the `/wp-content/plugins/` directory.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
 3. Navigate to the plugin settings page.
 4. Configure CSS Optimization settings. Documentation is available on [Github](https://github.com/o10n-x/wordpress-javascript-optimization/tree/master/docs).
@@ -45,6 +45,12 @@ Documentation is available on [Github](https://github.com/o10n-x/wordpress-javas
 2. Javascript Code Optimization
 3. Javascript Load Optimization
 4. Advanced Javascript Editor
+
+= 0.0.13 =
+* Bugfix: uninstaller.
+
+= 0.0.12 =
+Publication on WordPress.
 
 = 0.0.11 =
 Bugfix: settings link on plugin index.
