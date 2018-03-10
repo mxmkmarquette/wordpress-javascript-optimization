@@ -58,7 +58,7 @@ $this->form_start(__('Javascript Optimization', 'optimization'), 'js');
         <th scope="row">Concatenate</th>
         <td>
             <label><input type="checkbox" value="1" name="o10n[js.minify.concat.enabled]" data-json-ns="1"<?php $checked('js.minify.concat.enabled'); ?> /> Enabled</label>
-            <p class="description">Merge stylesheets into a single file.</p>
+            <p class="description">Merge scripts into a single file.</p>
             <p data-ns="js.minify.concat"<?php $visible('js.minify.concat'); ?>>
                 <label><input type="checkbox" value="1" name="o10n[js.minify.concat.minify]"<?php $checked('js.minify.concat.minify'); ?> /> Use <code>Minify</code> for concatenation.</label>
             </p>
@@ -115,7 +115,7 @@ $this->form_start(__('Javascript Optimization', 'optimization'), 'js');
         <td style="padding-top:0px;">
             <h5 class="h">&nbsp;Inline Merge Include List</h5>
             <textarea class="json-array-lines" name="o10n[js.minify.concat.inline.filter.include]" data-json-type="json-array-lines" placeholder="Leave blank to minify all inline CSS..."><?php $line_array('js.minify.concat.inline.filter.include'); ?></textarea>
-            <p class="description">Enter (parts of) inline <code>&lt;style&gt;</code> elements to concatenate, e.g. <code>background-color:white;</code> or <code>id="style"</code>. One match string per line.</p>
+            <p class="description">Enter (parts of) inline <code>&lt;script&gt;</code> elements to concatenate, e.g. <code>background-color:white;</code> or <code>id="script"</code>. One match string per line.</p>
         </td>
     </tr>
     <tr valign="top" data-ns="js.minify.concat.inline.filter"<?php $visible('js.minify.concat.inline.filter', ($get('js.minify.concat.inline.filter.type') === 'exclude')); ?> data-ns-condition="js.minify.concat.inline.filter.type==exclude">
@@ -123,7 +123,7 @@ $this->form_start(__('Javascript Optimization', 'optimization'), 'js');
         <td style="padding-top:0px;">
             <h5 class="h">&nbsp;Inline Merge Exclude List</h5>
             <textarea class="json-array-lines" name="o10n[js.minify.concat.inline.filter.exclude]" data-json-type="json-array-lines"><?php $line_array('js.minify.concat.inline.filter.exclude'); ?></textarea>
-            <p class="description">Enter (parts of) inline <code>&lt;style&gt;</code> elements to exclude from concatenation. One match string per line.</p>
+            <p class="description">Enter (parts of) inline <code>&lt;script&gt;</code> elements to exclude from concatenation. One match string per line.</p>
         </td>
     </tr>
     <tr valign="top" data-ns="js.minify"<?php $visible('js.minify');  ?>>
@@ -132,7 +132,7 @@ $this->form_start(__('Javascript Optimization', 'optimization'), 'js');
             <div id="js_search_replace"><div class="loading-json-editor"><?php print __('Loading JSON editor...', 'optimization'); ?></div></div>
             <input type="hidden" id="js_search_replace_src" name="o10n[js.replace]" data-json-type="json-array" />
 
-            <p class="description">This option enables to replace strings in the CSS <strong>before</strong> minification. Enter a JSON array with configuration objects <span class="dashicons dashicons-editor-help"></span>.</p>
+            <p class="description">This option enables to replace strings in the javascript code <strong>before</strong> minification. Enter a JSON array with configuration objects <span class="dashicons dashicons-editor-help"></span>.</p>
 
             <div class="info_yellow"><strong>Example:</strong> <code id="js_search_replace_example" class="clickselect" data-example-text="show string" title="<?php print esc_attr('Click to select', 'optimization'); ?>" style="cursor:copy;">{"search":"string to match","replace":"newstring"}</code> (<a href="javascript:void(0);" data-example="js_search_replace_example" data-example-html="<?php print esc_attr(__('{"search":"|string to (match)|i","replace":"newstring $1","regex":true}', 'optimization')); ?>">show regular expression</a>)</div>
         </td>
@@ -153,7 +153,7 @@ $this->form_start(__('Javascript Optimization', 'optimization'), 'js');
             <h5 class="h">&nbsp;URL filter configuration</h5>
             <div id="js-url_filter-config"><div class="loading-json-editor"><?php print __('Loading JSON editor...', 'optimization'); ?></div></div>
             <input type="hidden" class="json" name="o10n[js.url_filter.config]" data-json-type="json-array" data-json-editor-compact="1" data-json-editor-init="1" value="<?php print esc_attr($json('js.url_filter.config')); ?>" />
-            <p class="description">Enter a JSON array with objects. <code>url</code> is a string or regular expression to match a stylesheet URL, <code>ignore</code>, <code>delete</code> or <code>replace</code> control the filter.</p>
+            <p class="description">Enter a JSON array with objects. <code>url</code> is a string or regular expression to match a script URL, <code>ignore</code>, <code>delete</code> or <code>replace</code> control the filter.</p>
             <div class="info_yellow"><strong>Example:</strong> <code id="pre_url_example" data-example-text="show replace" class="clickselect" title="<?php print esc_attr('Click to select', 'optimization'); ?>" style="cursor:copy;">{"url":"/\/wp-content\/path\/([a-z]+)$/i","regex":true,"replace":"https://cdn.com/$1"}</code> (<a href="javascript:void(0);" data-example="pre_url_example" data-example-html=" <?php print esc_attr('{"url":"toolbar.","ignore":true}'); ?>">show ignore</a>)</div>
         </td>
     </tr>

@@ -5,8 +5,8 @@ if (! $_tests_dir) {
     $_tests_dir = '/tmp/wordpress-tests-lib';
 }
 
-define('PLUGIN_NAME', 'js-optimization.php');
-define('PLUGIN_FOLDER', 'js-optimization');
+define('PLUGIN_NAME', 'javascript-optimization.php');
+define('PLUGIN_FOLDER', 'javascript-optimization');
 define('PLUGIN_PATH', PLUGIN_FOLDER.'/'.PLUGIN_NAME);
 
 // Activates this plugin in WordPress so it can be tested.
