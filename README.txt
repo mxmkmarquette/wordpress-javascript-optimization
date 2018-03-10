@@ -5,7 +5,7 @@ Tags: javascript, minify, async, uglifyjs, concat, beautify, js, compress, compr
 Requires at least: 4.0
 Requires PHP: 5.4
 Tested up to: 4.9.4
-Stable tag: 0.0.13
+Stable tag: 0.0.16
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,16 @@ Documentation is available on [Github](https://github.com/o10n-x/wordpress-javas
 2. Javascript Code Optimization
 3. Javascript Load Optimization
 4. Advanced Javascript Editor
+
+
+= 0.0.16 =
+Core update (see changelog.txt)
+
+= 0.0.15 =
+* Removed invalid plugin file.
+
+= 0.0.14 =
+* Temporarily removed lazy loading scripts (under construction)
 
 = 0.0.13 =
 * Bugfix: uninstaller.

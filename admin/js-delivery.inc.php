@@ -194,7 +194,7 @@ $this->form_start(__('Javascript Delivery Optimization', 'optimization'), 'js');
             </div>
         </td>
     </tr>
-    <tr valign="top">
+    <!--tr valign="top">
         <th scope="row">
             Responsive Exec
         </th>
@@ -202,7 +202,7 @@ $this->form_start(__('Javascript Delivery Optimization', 'optimization'), 'js');
             <label><input type="checkbox" name="o10n[js.async.responsive]" value="1"<?php $checked('js.async.responsive'); ?>> Enabled</label>
             <p class="description">When enabled, inline scripts such as Facebook like and Twitter follow buttons can be loaded when scrolled into view or based on a <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries" target="_blank">Media Query</a> by adding the attribute <code>data-exec="inview[:offset]"</code> or <code>data-exec="mediaQuery"</code>.</p>
         </td>
-    </tr>
+    </tr-->
      <!--tr valign="top" data-ns="js.async"<?php $visible('js.async');  ?>>
         <th scope="row">
             Abide Dependencies
