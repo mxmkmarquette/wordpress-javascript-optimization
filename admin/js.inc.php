@@ -98,7 +98,7 @@ $this->form_start(__('Javascript Optimization', 'optimization'), 'js');
         <th scope="row">Merge Inline</th>
         <td>
             <label><input type="checkbox" value="1" name="o10n[js.minify.concat.inline.enabled]" data-json-ns="1"<?php $checked('js.minify.concat.inline.enabled'); ?>> Enabled</label>
-            <p class="description">Extract inline <code>&lt;style&gt;</code> elements and include the CSS in the concatenated stylesheet.</p>
+            <p class="description">Extract inline <code>&lt;script&gt;</code> elements and include the javascript in the concatenated script.</p>
             <p data-ns="js.minify.concat.inline"<?php $visible('js.minify.concat.inline'); ?>>
                 <label><input type="checkbox" value="1" name="o10n[js.minify.concat.inline.filter.enabled]" data-json-ns="1"<?php $checked('js.minify.concat.inline.filter.enabled'); ?> /> Enable filter</label>
                 <span data-ns="js.minify.concat.inline.filter"<?php $visible('js.minify.concat.inline.filter'); ?>>

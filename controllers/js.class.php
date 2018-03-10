@@ -535,7 +535,7 @@ class Js extends Controller implements Controller_Interface
                 if (isset($script['replaceSrc'])) {
 
                     // replace src in tag
-                    $this->output->add_search_replace($script['tag'], $this->src_regex($script['tag'], $script['src']));
+                    $this->output->add_search_replace($script['tag'], $this->attr_regex('src', $script['tag'], $script['src']));
                 }
             }
         }
@@ -1168,11 +1168,26 @@ class Js extends Controller implements Controller_Interface
                 // attributes
                 $attributes = trim($out[2][$n]);
 
+                // verify type
+                $type = strpos($attributes, 'type');
+                if ($type !== false) {
+                    $type = $this->attr_regex('type', $attributes);
+                    if ($type) {
+                        $type = trim(strtolower($type));
+                        if (strpos($type, 'application/javascript') !== false || strpos($type, 'text/javascript') !== false) {
+                            // OK
+                        } else {
+                            // invalid type, ignore script
+                            continue 1;
+                        }
+                    }
+                }
+
                 // verify if tag contains src
                 $src = strpos($attributes, 'src');
                 if ($src !== false) {
                     // extract src using regular expression
-                    $src = $this->src_regex($attributes);
+                    $src = $this->attr_regex('src', $attributes);
                     if (!$src) {
                         continue 1;
                     }
@@ -1620,34 +1635,35 @@ class Js extends Controller implements Controller_Interface
     }
 
     /**
-     * Extract src from tag
+     * Extract attribute from tag
      *
      * @param  string $attributes HTML tag attributes
      * @param  string $replace    src value to replace
      * @return string src or modified tag
      */
-    final private function src_regex($attributes, $replace = false)
+    final private function attr_regex($param, $attributes, $replace = false)
     {
         // detect if tag has src
-        $srcpos = strpos($attributes, 'src');
+        $srcpos = strpos($attributes, $param);
         if ($srcpos !== false) {
+            $param_quote = preg_quote($param);
 
             // regex
             $char = substr($attributes, ($srcpos + 4), 1);
             if ($char === '"' || $char === '\'') {
                 $char = preg_quote($char);
-                $regex = '#(src\s*=\s*'.$char.')([^'.$char.']+)('.$char.')#Usmi';
+                $regex = '#('.$param_quote.'\s*=\s*'.$char.')([^'.$char.']+)('.$char.')#Usmi';
             } elseif ($char === ' ' || $char === "\n") {
-                $regex = '#(src\s*=\s*["|\'])([^"|\']+)(["|\'])#Usmi';
+                $regex = '#('.$param_quote.'\s*=\s*["|\'])([^"|\']+)(["|\'])#Usmi';
             } else {
                 $attributes .= '>';
-                $regex = '#(src\s*=)([^\s>]+)(\s|>)#Usmi';
+                $regex = '#('.$param_quote.'\s*=)([^\s>]+)(\s|>)#Usmi';
             }
 
-            // return src
+            // return param
             if (!$replace) {
 
-                // match src
+                // match param
                 if (!preg_match($regex, $attributes, $out)) {
                     return false;
                 }
@@ -1655,7 +1671,7 @@ class Js extends Controller implements Controller_Interface
                 return ($out[2]) ? $this->url->translate_protocol($out[2]) : $out[2];
             }
 
-            // replace src in tag
+            // replace param in tag
             $attributes = preg_replace($regex, '$1' . $replace . '$3', $attributes);
         }
 
