@@ -50,6 +50,9 @@ class AdminJs extends ModuleAdminController implements Module_Admin_Controller_I
                     'href' => '#eslint'
                 )
             )
+        ),
+        'settings' => array(
+            'title' => 'Settings'
         )
     );
 

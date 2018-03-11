@@ -305,8 +305,7 @@ class Js extends Controller implements Controller_Interface
 
             // concatenate
             if ($concat && (
-                isset($script['inline']) // inline
-                || (isset($script['minified']) && $script['minified']) // minified source
+                (isset($script['minified']) && $script['minified']) // minified source
             )) {
 
                 // concat group filter
@@ -574,11 +573,11 @@ class Js extends Controller implements Controller_Interface
                 $async_insert_position++;
 
                 // calcualte hash from source files
-                $urlhash = md5(implode('|', $concat_hashes));
+                $urlhash = md5(implode('|xx', $concat_hashes));
 
                 // load from cache
                 if ($this->cache->exists('js', 'concat', $urlhash)) {
-
+   
                     // preserve cache file based on access
                     $this->cache->preserve('js', 'concat', $urlhash, (time() - 3600));
 
@@ -1197,6 +1196,7 @@ class Js extends Controller implements Controller_Interface
                         $script['text'] = $text;
                     }
                 } elseif ($concat_inline && $text) {
+                    $textx = $text;
 
                     // inline script
 
@@ -1217,8 +1217,13 @@ class Js extends Controller implements Controller_Interface
                     }
 
                     // replace script
-                    if ($filteredText !== $text) {
+                    if (!is_null($filteredText) && $filteredText !== $text) {
                         $text = $filteredText;
+                    }
+
+                    // strip CDATA
+                    if (stripos($text, 'cdata') !== false) {
+                        $text = preg_replace('#^.*<!\[CDATA\[(?:\s*\*/)?(.*)(?://|/\*)\s*?\]\]>.*$#smi', '$1', $text);
                     }
 
                     // apply inline filter
@@ -1392,75 +1397,83 @@ class Js extends Controller implements Controller_Interface
     {
         // walk extracted script elements
         foreach ($this->script_elements as $n => $script) {
-            
-            // skip inline scripts
-            if (isset($script['inline']) && $script['inline']) {
-                continue;
-            }
 
             // minify disabled
             if (!isset($script['minify']) || !$script['minify']) {
                 continue;
             }
-
-            // minify hash
-            $urlhash = $this->minify_hash($script['src']);
-
-            // detect local URL
-            $local = $this->url->is_local($script['src']);
-
-            $cache_file_hash = $proxy_file_meta = false;
-
-            // local URL, verify change based on content hash
-            if ($local) {
-
-                // get local file hash
-                $file_hash = md5_file($local);
-            } else { // remote URL
-
-                // invalid prefix
-                if (!$this->url->valid_protocol($script['src'])) {
-                    continue 1;
+            
+            if (isset($script['inline']) && $script['inline']) {
+                $url = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+                $base_href = $url;
+                if (substr($base_href, -1) === '/') {
+                    $base_href .= 'page.html';
                 }
+                $urlhash = md5($url . $script['text']);
+                $file_hash = md5($script['text']);
+                $scriptText = $script['text'];
+                $local = false;
+            } else {
 
-                // try cache
-                if ($this->cache->exists('js', 'src', $urlhash) && (!$this->options->bool('js.minify.clean-js.sourceMap') || $this->cache->exists('js', 'src', $urlhash, false, '.js.map'))) {
+                // minify hash
+                $urlhash = $this->minify_hash($script['src']);
 
-                    // verify content
-                    $proxy_file_meta = $this->proxy->meta('js', $script['src']);
-                    $cache_file_hash = $this->cache->meta('js', 'src', $urlhash, true);
+                // detect local URL
+                $local = $this->url->is_local($script['src']);
 
-                    if ($proxy_file_meta && $cache_file_hash && $proxy_file_meta[2] === $cache_file_hash) {
+                $cache_file_hash = $proxy_file_meta = false;
 
-                        // preserve cache file based on access
-                        $this->cache->preserve('js', 'src', $urlhash, (time() - 3600));
-                   
-                        // add minified path
-                        $this->script_elements[$n]['minified'] = array($urlhash,$cache_file_hash);
+                // local URL, verify change based on content hash
+                if ($local) {
 
-                        // update content in background using proxy (conditionl HEAD request)
-                        $this->proxy->proxify('js', $script['src']);
+                    // get local file hash
+                    $file_hash = md5_file($local);
+                } else { // remote URL
+
+                    // invalid prefix
+                    if (!$this->url->valid_protocol($script['src'])) {
                         continue 1;
                     }
-                }
-                
-                // download script using proxy
-                try {
-                    $scriptData = $this->proxy->proxify('js', $script['src'], 'filedata');
-                } catch (HTTPException $err) {
-                    $scriptData = false;
-                } catch (Exception $err) {
-                    $scriptData = false;
-                }
 
-                // failed to download file or file is empty
-                if (!$scriptData) {
-                    continue 1;
-                }
+                    // try cache
+                    if ($this->cache->exists('js', 'src', $urlhash) && (!$this->options->bool('js.minify.clean-js.sourceMap') || $this->cache->exists('js', 'src', $urlhash, false, '.js.map'))) {
 
-                // file hash
-                $file_hash = $scriptData[1][2];
-                $scriptText = $scriptData[0];
+                        // verify content
+                        $proxy_file_meta = $this->proxy->meta('js', $script['src']);
+                        $cache_file_hash = $this->cache->meta('js', 'src', $urlhash, true);
+
+                        if ($proxy_file_meta && $cache_file_hash && $proxy_file_meta[2] === $cache_file_hash) {
+
+                            // preserve cache file based on access
+                            $this->cache->preserve('js', 'src', $urlhash, (time() - 3600));
+                       
+                            // add minified path
+                            $this->script_elements[$n]['minified'] = array($urlhash,$cache_file_hash);
+
+                            // update content in background using proxy (conditionl HEAD request)
+                            $this->proxy->proxify('js', $script['src']);
+                            continue 1;
+                        }
+                    }
+                    
+                    // download script using proxy
+                    try {
+                        $scriptData = $this->proxy->proxify('js', $script['src'], 'filedata');
+                    } catch (HTTPException $err) {
+                        $scriptData = false;
+                    } catch (Exception $err) {
+                        $scriptData = false;
+                    }
+
+                    // failed to download file or file is empty
+                    if (!$scriptData) {
+                        continue 1;
+                    }
+
+                    // file hash
+                    $file_hash = $scriptData[1][2];
+                    $scriptText = $scriptData[0];
+                }
             }
 
             // get content hash
@@ -1538,6 +1551,10 @@ class Js extends Controller implements Controller_Interface
 
                 // footer
                 $minified['text'] .= "\n/* @src ".$script['src']." */";
+
+                if (isset($script['inline']) && $script['inline']) {
+                    $this->script_elements[$n]['text'] = $minified['text'];
+                }
 
                 // store script
                 $cache_file_path = $this->cache->put(

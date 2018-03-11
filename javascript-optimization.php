@@ -12,7 +12,7 @@ namespace O10n;
  * @wordpress-plugin
  * Plugin Name:       Javascript Optimization
  * Description:       Advanced Javascript optimization toolkit. Minify, concat/merge, async loading, advanced editor, ES Lint, UglifyJS (professional), beautifier, HTTP/2 Server Push and more.
- * Version:           0.0.21
+ * Version:           0.0.25
  * Author:            Optimization.Team
  * Author URI:        https://optimization.team/
  * Text Domain:       o10n
@@ -29,8 +29,8 @@ if (defined('WP_INSTALLING') && WP_INSTALLING) {
 }
 
 // settings
-$module_version = '0.0.21';
-$minimum_core_version = '0.0.16';
+$module_version = '0.0.25';
+$minimum_core_version = '0.0.23';
 $plugin_path = dirname(__FILE__);
 
 // load the optimization module loader

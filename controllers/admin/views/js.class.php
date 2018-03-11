@@ -107,6 +107,7 @@ class AdminViewJs extends AdminViewBase
                 case "delivery":
                 case "editor":
                 case "pwa":
+                case "settings":
                 case "intro":
                     $view_key = 'js-' . $tab;
                 break;
@@ -320,6 +321,45 @@ class AdminViewJs extends AdminViewBase
             break;
             case "editor":
                 
+            break;
+
+            case "settings":
+
+                // Javascript profile
+                $js = $forminput->get('js', 'json-array');
+                if ($js) {
+
+                    // @todo improve
+                    $iterator = new \RecursiveIteratorIterator(
+                        new \RecursiveArrayIterator($js),
+                        \RecursiveIteratorIterator::SELF_FIRST
+                    );
+                    $path = [];
+                    $flatArray = [];
+
+                    $arrayVal = false;
+                    foreach ($iterator as $key => $value) {
+                        $path[$iterator->getDepth()] = $key;
+
+                        $dotpath = 'js.'.implode('.', array_slice($path, 0, $iterator->getDepth() + 1));
+                        if ($arrayVal && strpos($dotpath, $arrayVal) === 0) {
+                            continue 1;
+                        }
+
+                        if (!is_array($value) || empty($value) || array_keys($value)[0] === 0) {
+                            if (is_array($value) && array_keys($value)[0] === 0) {
+                                $arrayVal = $dotpath;
+                            } else {
+                                $arrayVal = false;
+                            }
+
+                            $flatArray[$dotpath] = $value;
+                        }
+                    }
+
+                    // replace all options
+                    $this->AdminOptions->save($flatArray, true);
+                }
             break;
             default:
                 throw new Exception('Invalid Javascript view ' . esc_html($tab), 'core');

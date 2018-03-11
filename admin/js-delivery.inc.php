@@ -349,7 +349,9 @@ submit_button(__('Save'), 'primary large', 'is_submit', false);
         <td style="padding-top:0px;">
             <h5 class="h">&nbsp;Proxy Capture List</h5>
             <div id="js-proxy-capture-list"><div class="loading-json-editor"><?php print __('Loading JSON editor...', 'optimization'); ?></div></div>
-            <input type="hidden" class="json" name="o10n[js.proxy.capture.list]" data-json-type="json-array" data-json-editor-compact="1" data-json-editor-init="1" value="<?php print esc_attr($json('js.proxy.capture.list')); ?>" />
+            <input type="hidden" class="json" name="o10n[js.proxy.capture.list]" data-json-type="json-array" data-json-editor-init="1" value="<?php print esc_attr($json('js.proxy.capture.list')); ?>" />
+            <p class="description">Enter a JSON array with script URL strings or JSON objects with a regular expression match. </p>
+            <div class="info_yellow"><strong>Example:</strong> <code id="js_proxy_capture_example" class="clickselect" data-example-text="show string" title="<?php print esc_attr('Click to select', 'optimization'); ?>" style="cursor:copy;">["https://www.google-analytics.com/analytics.js", "https://domain.com/script.js"]</code> (<a href="javascript:void(0);" data-example="js_proxy_capture_example" data-example-html="<?php print esc_attr(__('[{"match": "/script-with-random-query-string\\\\.js\\\\?[0-9]+/i", "regex": true, "url": "https://www.url.to/script-to-proxy-and-cache.js" }]', 'optimization')); ?>">show regular expression</a>)</div>
         </td>
     </tr>
     <tr valign="top">
