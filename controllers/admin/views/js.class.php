@@ -32,7 +32,9 @@ class AdminViewJs extends AdminViewBase
         // instantiate controller
         return parent::construct($Core, array(
             'json',
-            'AdminClient'
+            'AdminClient',
+            'options',
+            'AdminOptions'
         ));
     }
     
@@ -136,57 +138,137 @@ class AdminViewJs extends AdminViewBase
 
                 $forminput->type_verify(array(
                     'js.minify.enabled' => 'bool',
-
-                    'js.minify.filter.enabled' => 'bool',
-                    'js.minify.filter.type' => 'string',
-                    'js.minify.filter.include' => 'newline_array',
-                    'js.minify.filter.exclude' => 'newline_array',
-
-                    'js.minify.concat.enabled' => 'bool',
-                    'js.minify.concat.minify' => 'bool',
-                    'js.minify.concat.trycatch' => 'bool',
-
-                    'js.minify.concat.filter.enabled' => 'bool',
-                    'js.minify.concat.filter.type' => 'string',
-                    'js.minify.concat.filter.config' => 'json-array',
-
-                    'js.minify.concat.inline.enabled' => 'bool',
-                    'js.minify.concat.inline.filter.enabled' => 'bool',
-                    'js.minify.concat.inline.filter.type' => 'string',
-                    'js.minify.concat.inline.filter.include' => 'newline_array',
-                    'js.minify.concat.inline.filter.exclude' => 'newline_array',
-
-                    'js.replace' => 'json-array',
-
-                    'js.url_filter.enabled' => 'bool',
-                    'js.url_filter.config' => 'json-array'
+                    'js.url_filter.enabled' => 'bool'
                 ));
+ 
+                // minify
+                if ($forminput->bool('js.minify.enabled')) {
+                    $forminput->type_verify(array(
+                        'js.minify.minifier' => 'string',
 
-                // verify search & replace
-                $jsreplace = $forminput->get('js.replace', 'json-array', array());
-                if (!empty($jsreplace)) {
-                    $searchreplace = array();
-                    $position = 0;
-                    foreach ($jsreplace as $cnf) {
-                        if (!is_array($cnf) || !isset($cnf['search']) || !isset($cnf['replace'])) {
-                            continue;
+                        'js.minify.comments.remove_important.enabled' => 'bool',
+                        'js.minify.filter.enabled' => 'bool',
+                        'js.replace' => 'json-array',
+                        'js.minify.concat.enabled' => 'bool'
+
+                    ));
+
+                    // minifier
+                    $minifier = $forminput->get('js.minify.minifier');
+                    if ($minifier === 'closure-compiler-service') {
+                        $forminput->type_verify(array(
+                            'js.minify.minifier' => 'string',
+                            'js.minify.fallback.enabled' => 'bool',
+
+                            'js.minify.closure-compiler-service.options.compilation_level.enabled' => 'bool',
+                            'js.minify.closure-compiler-service.options.externs_files.enabled' => 'bool',
+                            'js.minify.closure-compiler-service.options.exclude_default_externs' => 'bool',
+                            'js.minify.closure-compiler-service.options.formatting.enabled' => 'bool',
+                            'js.minify.closure-compiler-service.options.use_closure_library' => 'bool'
+                        ));
+
+                        if ($forminput->bool('js.minify.closure-compiler-service.options.compilation_level.enabled')) {
+                            $forminput->type_verify(array(
+                                'js.minify.closure-compiler-service.options.compilation_level.level' => 'string'
+                            ));
                         }
-                        $position++;
-                        if (isset($cnf['regex'])) {
-                            // exec preg_match on null
-                            $valid = @preg_match($cnf['search'], null);
-                            $error = $this->is_preg_error();
-                            if ($valid === false || $error) {
-                                throw new Exception('<code>'.esc_html($cnf['search']).'</code> is an invalid regular expression and has been removed.' . (($error) ? '<br /><p>Error: '.$error.'</p>' : ''), 'settings');
-                            }
+
+                        if ($forminput->bool('js.minify.closure-compiler-service.options.externs_files.enabled')) {
+                            $forminput->type_verify(array(
+                                'js.minify.closure-compiler-service.options.externs_files.files' => 'json-array'
+                            ));
                         }
-                        $searchreplace[] = $cnf;
+
+                        if ($forminput->bool('js.minify.closure-compiler-service.options.formatting.enabled')) {
+                            $forminput->type_verify(array(
+                                'js.minify.closure-compiler-service.options.formatting.format' => 'string'
+                            ));
+                        }
+
+                        // fallback minifier
+                        if ($forminput->bool('js.minify.fallback.enabled')) {
+                            $forminput->type_verify(array(
+                                'js.minify.fallback.minifier' => 'string',
+                                'js.minify.fallback.timeout' => 'int-empty'
+                            ));
+                        }
                     }
-                    $jsreplace = $searchreplace;
+
+                    // minify filter
+                    if ($forminput->bool('js.minify.filter.enabled')) {
+                        $forminput->type_verify(array(
+                            'js.minify.filter.type' => 'string',
+                            'js.minify.filter.include' => 'newline_array',
+                            'js.minify.filter.exclude' => 'newline_array'
+                        ));
+                    }
+
+                    // concat
+                    if ($forminput->bool('js.minify.concat.enabled')) {
+                        $forminput->type_verify(array(
+                            
+                            'js.minify.concat.minify' => 'bool',
+                            'js.minify.concat.trycatch' => 'bool',
+
+                            'js.minify.concat.filter.enabled' => 'bool',
+                            'js.minify.concat.filter.type' => 'string',
+                            'js.minify.concat.filter.config' => 'json-array',
+
+                            'js.minify.concat.inline.enabled' => 'bool',
+                            'js.minify.concat.inline.filter.enabled' => 'bool'
+                        ));
+                        
+                        // concat filter
+                        if ($forminput->bool('js.minify.concat.filter.enabled')) {
+                            $forminput->type_verify(array(
+                                'js.minify.concat.filter.type' => 'string',
+                                'js.minify.concat.filter.config' => 'json-array'
+                            ));
+                        }
+
+                        // concat inline filter
+                        if ($forminput->bool('js.minify.concat.inline.enabled') && $forminput->bool('js.minify.concat.inline.filter.enabled')) {
+                            $forminput->type_verify(array(
+                                'js.minify.concat.inline.filter.type' => 'string',
+                                'js.minify.concat.inline.filter.include' => 'newline_array',
+                                'js.minify.concat.inline.filter.exclude' => 'newline_array'
+                            ));
+                        }
+                    }
+
+                    // verify search & replace
+                    $jsreplace = $forminput->get('js.replace', 'json-array', array());
+                    if (!empty($jsreplace)) {
+                        $searchreplace = array();
+                        $position = 0;
+                        foreach ($jsreplace as $cnf) {
+                            if (!is_array($cnf) || !isset($cnf['search']) || !isset($cnf['replace'])) {
+                                continue;
+                            }
+                            $position++;
+                            if (isset($cnf['regex'])) {
+                                // exec preg_match on null
+                                $valid = @preg_match($cnf['search'], null);
+                                $error = $this->is_preg_error();
+                                if ($valid === false || $error) {
+                                    throw new Exception('<code>'.esc_html($cnf['search']).'</code> is an invalid regular expression and has been removed.' . (($error) ? '<br /><p>Error: '.$error.'</p>' : ''), 'settings');
+                                }
+                            }
+                            $searchreplace[] = $cnf;
+                        }
+                        $jsreplace = $searchreplace;
+                    }
+  
+                    // set search & replace
+                    $forminput->set('js.replace', $jsreplace);
                 }
 
-                // set search & replace
-                $forminput->set('js.replace', $jsreplace);
+                // url filter
+                if ($forminput->bool('js.url_filter.enabled')) {
+                    $forminput->type_verify(array(
+                        'js.url_filter.config' => 'json-array'
+                    ));
+                }
             break;
             case "delivery":
 
@@ -194,94 +276,115 @@ class AdminViewJs extends AdminViewBase
 
                 $forminput->type_verify(array(
                     'js.async.enabled' => 'bool',
-                    'js.async.rel_preload' => 'bool',
-
-                    'js.async.filter.enabled' => 'bool',
-                    'js.async.filter.type' => 'string',
-                    'js.async.filter.config' => 'json-array',
-
-                    'js.async.load_position' => 'string',
-
-                    'js.async.exec_timing.enabled' => 'bool',
-
-                    'js.async.responsive' => 'bool',
-                    'js.async.jQuery_stub' => 'bool',
 
                     'js.http2_push.enabled' => 'bool',
-
-                    'js.async.localStorage.enabled' => 'bool',
 
                     'js.proxy.enabled' => 'bool',
 
                     'js.cdn.enabled' => 'bool'
                 ));
                 
-
-                // load timing
-                if ($forminput->get('js.async.load_position') === 'timing') {
+                // async
+                if ($forminput->bool('js.async.enabled')) {
                     $forminput->type_verify(array(
-                        'js.async.load_timing.type' => 'string'
+                        'js.async.rel_preload' => 'bool',
+
+                        'js.async.filter.enabled' => 'bool',
+                        'js.async.filter.type' => 'string',
+
+                        'js.async.load_position' => 'string',
+
+                        'js.async.exec_timing.enabled' => 'bool',
+
+                        'js.async.responsive' => 'bool',
+                        'js.async.jQuery_stub' => 'bool',
+                        'js.async.localStorage.enabled' => 'bool'
                     ));
 
-                    if ($forminput->get('js.async.load_timing.type') === 'requestAnimationFrame') {
+                    // async filter
+                    if ($forminput->bool('js.async.filter.enabled')) {
                         $forminput->type_verify(array(
-                            'js.async.load_timing.frame' => 'int-empty'
+                            'js.async.filter.config' => 'json-array'
                         ));
                     }
 
-                    if ($forminput->get('js.async.load_timing.type') === 'requestIdleCallback') {
+                    // load timing
+                    if ($forminput->get('js.async.load_position') === 'timing') {
                         $forminput->type_verify(array(
-                            'js.async.load_timing.timeout' => 'int-empty',
-                            'js.async.load_timing.setTimeout' => 'int-empty'
+                            'js.async.load_timing.type' => 'string'
                         ));
+
+                        if ($forminput->get('js.async.load_timing.type') === 'requestAnimationFrame') {
+                            $forminput->type_verify(array(
+                                'js.async.load_timing.frame' => 'int-empty'
+                            ));
+                        }
+
+                        if ($forminput->get('js.async.load_timing.type') === 'requestIdleCallback') {
+                            $forminput->type_verify(array(
+                                'js.async.load_timing.timeout' => 'int-empty',
+                                'js.async.load_timing.setTimeout' => 'int-empty'
+                            ));
+                        }
+                
+                        if ($forminput->get('js.async.load_timing.type') === 'inview') {
+                            $forminput->type_verify(array(
+                                'js.async.load_timing.selector' => 'string',
+                                'js.async.load_timing.offset' => 'int-empty'
+                            ));
+                        }
+
+                        if ($forminput->get('js.async.load_timing.type') === 'media') {
+                            $forminput->type_verify(array(
+                                'js.async.load_timing.media' => 'string'
+                            ));
+                        }
                     }
+
+                    // exec timing
+                    if ($forminput->bool('js.async.exec_timing.enabled')) {
+                        $forminput->type_verify(array(
+                            'js.async.exec_timing.type' => 'string'
+                        ));
+
+                        if ($forminput->get('js.async.exec_timing.type') === 'requestAnimationFrame') {
+                            $forminput->type_verify(array(
+                                'js.async.exec_timing.frame' => 'int-empty'
+                            ));
+                        }
+
+                        if ($forminput->get('js.async.exec_timing.type') === 'requestIdleCallback') {
+                            $forminput->type_verify(array(
+                                'js.async.exec_timing.timeout' => 'int-empty',
+                                'js.async.exec_timing.setTimeout' => 'int-empty'
+                            ));
+                        }
             
-                    if ($forminput->get('js.async.load_timing.type') === 'inview') {
-                        $forminput->type_verify(array(
-                            'js.async.load_timing.selector' => 'string',
-                            'js.async.load_timing.offset' => 'int-empty'
-                        ));
+                        if ($forminput->get('js.async.exec_timing.type') === 'inview') {
+                            $forminput->type_verify(array(
+                                'js.async.exec_timing.selector' => 'string',
+                                'js.async.exec_timing.offset' => 'int-empty'
+                            ));
+                        }
+
+                        if ($forminput->get('js.async.exec_timing.type') === 'media') {
+                            $forminput->type_verify(array(
+                                'js.async.exec_timing.media' => 'string'
+                            ));
+                        }
                     }
 
-                    if ($forminput->get('js.async.load_timing.type') === 'media') {
+                    // localStorage
+                    if ($forminput->bool('js.async.localStorage.enabled')) {
                         $forminput->type_verify(array(
-                            'js.async.load_timing.media' => 'string'
+                            'js.async.localStorage.max_size' => 'int',
+                            'js.async.localStorage.expire' => 'int',
+                            'js.async.localStorage.update_interval' => 'int',
+                            'js.async.localStorage.head_update' => 'bool'
                         ));
                     }
                 }
 
-                // exec timing
-                if ($forminput->bool('js.async.exec_timing.enabled')) {
-                    $forminput->type_verify(array(
-                        'js.async.exec_timing.type' => 'string'
-                    ));
-
-                    if ($forminput->get('js.async.exec_timing.type') === 'requestAnimationFrame') {
-                        $forminput->type_verify(array(
-                            'js.async.exec_timing.frame' => 'int-empty'
-                        ));
-                    }
-
-                    if ($forminput->get('js.async.exec_timing.type') === 'requestIdleCallback') {
-                        $forminput->type_verify(array(
-                            'js.async.exec_timing.timeout' => 'int-empty',
-                            'js.async.exec_timing.setTimeout' => 'int-empty'
-                        ));
-                    }
-        
-                    if ($forminput->get('js.async.exec_timing.type') === 'inview') {
-                        $forminput->type_verify(array(
-                            'js.async.exec_timing.selector' => 'string',
-                            'js.async.exec_timing.offset' => 'int-empty'
-                        ));
-                    }
-
-                    if ($forminput->get('js.async.exec_timing.type') === 'media') {
-                        $forminput->type_verify(array(
-                            'js.async.exec_timing.media' => 'string'
-                        ));
-                    }
-                }
 
                 // HTTP/2
                 if ($forminput->bool('js.http2_push.filter.enabled')) {
@@ -292,23 +395,19 @@ class AdminViewJs extends AdminViewBase
                     ));
                 }
 
-                // localStorage
-                if ($forminput->bool('js.async.localStorage.enabled')) {
-                    $forminput->type_verify(array(
-                        'js.async.localStorage.max_size' => 'int',
-                        'js.async.localStorage.expire' => 'int',
-                        'js.async.localStorage.update_interval' => 'int',
-                        'js.async.localStorage.head_update' => 'bool'
-                    ));
-                }
-
                 // proxy
                 if ($forminput->bool('js.proxy.enabled')) {
                     $forminput->type_verify(array(
                         'js.proxy.include' => 'newline_array',
-                        'js.proxy.capture.enabled' => 'bool',
-                        'js.proxy.capture.list' => 'json-array'
+                        'js.proxy.capture.enabled' => 'bool'
                     ));
+
+                    // proxy capture
+                    if ($forminput->bool('js.proxy.capture.enabled')) {
+                        $forminput->type_verify(array(
+                            'js.proxy.capture.list' => 'json-array'
+                        ));
+                    }
                 }
 
                 if ($forminput->bool('js.cdn.enabled')) {
@@ -347,7 +446,7 @@ class AdminViewJs extends AdminViewBase
                         }
 
                         if (!is_array($value) || empty($value) || array_keys($value)[0] === 0) {
-                            if (is_array($value) && array_keys($value)[0] === 0) {
+                            if (is_array($value) && (empty($value) || array_keys($value)[0] === 0)) {
                                 $arrayVal = $dotpath;
                             } else {
                                 $arrayVal = false;
@@ -357,8 +456,11 @@ class AdminViewJs extends AdminViewBase
                         }
                     }
 
+                    // delete existing options
+                    $this->options->delete('js.*');
+
                     // replace all options
-                    $this->AdminOptions->save($flatArray, true);
+                    $this->AdminOptions->save($flatArray);
                 }
             break;
             default:

@@ -76,6 +76,7 @@ $this->form_start(__('Javascript Delivery Optimization', 'optimization'), 'js');
         <td>
             <select name="o10n[js.async.load_position]" data-ns-change="js.async">
                 <option value="header"<?php $selected('js.async.load_position', 'header'); ?>>Header</option>
+                <option value="footer"<?php $selected('js.async.load_position', 'footer'); ?>>Footer</option>
                 <option value="timing"<?php $selected('js.async.load_position', 'timing'); ?>>Timed</option>
             </select>
             <p class="description">Select the position of the HTML document where the downloading of scripts will start.</p>

@@ -25,6 +25,50 @@
             "type": "boolean",
             "default": false
         },
+        "verify": {
+            "title": "Verify service worker hash to force updates",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "title": "Enable service worker verification.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "update_interval": {
+                    "title": "Enter a time in seconds to verify the service worker hash.",
+                    "oneOf": [{
+                        "type": "number",
+                        "minimum": 0
+                    }, {
+                        "type": "string",
+                        "enum": [""]
+                    }]
+                }
+            },
+            "additionalProperties": false
+        },
+        "importScripts": {
+            "title": "Import and bundle service worker scripts",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "title": "Enable importScripts.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "scripts": {
+                    "title": "Scripts to import in service worker.",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "uri",
+                        "minLength": 1
+                    },
+                    "uniqueItems": true
+                }
+            },
+            "additionalProperties": false
+        },
         "bypass": {
             "title": "Service worker bypass filter",
             "type": "object",
@@ -318,6 +362,96 @@
                 "start_url"
             ],
             "additionalProperties": true
+        },
+        "background-fetch": {
+            "title": "Fetch resources in background worker",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "title": "Enable background fetch",
+                    "type": "boolean",
+                    "default": false
+                },
+                "policy": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "title": {
+                                "title": "Policy reference",
+                                "type": "string"
+                            },
+                            "match": {
+                                "title": "Match conditions",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "pwa.json#/definitions/matchRequest"
+                                },
+                                "uniqueItems": true
+
+                            },
+                            "force": {
+                                "title": "Wait for background web worker to be ready.",
+                                "type": "boolean",
+                                "default": false
+                            },
+                            "timeout": {
+                                "title": "Time in milliseconds to wait for the service worker to reply.",
+                                "oneOf": [{
+                                    "type": "number",
+                                    "minimum": 0
+                                }, {
+                                    "type": "string",
+                                    "enum": [""]
+                                }],
+                                "default": 1000
+                            },
+                            "startup_timeout": {
+                                "title": "Time in milliseconds to wait for the web worker to be ready.",
+                                "oneOf": [{
+                                    "type": "number",
+                                    "minimum": 0
+                                }, {
+                                    "type": "string",
+                                    "enum": [""]
+                                }],
+                                "default": 1000
+                            }
+                        },
+                        "additionalProperties": false,
+                        "required": ["match"]
+                    },
+                    "uniqueItems": true
+                },
+                "force": {
+                    "title": "Wait for background web worker to be ready.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "timeout": {
+                    "title": "Time in milliseconds to wait for the service worker to reply.",
+                    "oneOf": [{
+                        "type": "number",
+                        "minimum": 0
+                    }, {
+                        "type": "string",
+                        "enum": [""]
+                    }],
+                    "default": 5000
+                },
+                "startup_timeout": {
+                    "title": "Time in milliseconds to wait for the web worker to be ready.",
+                    "oneOf": [{
+                        "type": "number",
+                        "minimum": 0
+                    }, {
+                        "type": "string",
+                        "enum": [""]
+                    }],
+                    "default": 1000
+                }
+            },
+            "additionalProperties": false
         }
     },
     "additionalProperties": false,

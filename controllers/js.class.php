@@ -23,6 +23,8 @@ class Js extends Controller implements Controller_Interface
     // automatically load dependencies
     private $client_module_dependencies = array();
 
+    private $minifier; // minifier
+
     private $replace = null; // replace in script
     private $script_cdn = null; // script CDN config
     private $http2_push = null; // HTTP/2 Server Push config
@@ -43,6 +45,9 @@ class Js extends Controller implements Controller_Interface
     private $async_filterType;
 
     private $localStorage = false; // default localStorage config
+
+    // closure compiler service instance
+    private $ClosureCompilerService = null;
 
     /**
      * Load controller
@@ -72,7 +77,8 @@ class Js extends Controller implements Controller_Interface
      * Setup controller
      */
     protected function setup()
-    {
+    {        // local curl proxy
+
         // disabled
         if (!$this->env->is_optimization()) {
             return;
@@ -83,6 +89,9 @@ class Js extends Controller implements Controller_Interface
 
         // extract scripts for processing?
         if ($this->options->bool(['js.minify','js.async','js.proxy'])) {
+            if ($this->options->bool('js.minify.enabled')) {
+                $this->minifier = $this->options->get('js.minify.minifier', 'jsmin');
+            }
             
             // add script optimization client module
             $this->client->load_module('js', O10N_CORE_VERSION, $this->core->modules('js')->dir_path());
@@ -103,9 +112,12 @@ class Js extends Controller implements Controller_Interface
                 }
 
                 // async download position
-                $this->load_position = ($this->options->get('js.async.load_position') === 'timing') ? 'timing' : 'header';
+                $this->load_position = $this->options->get('js.async.load_position', 'header');
 
-                if ($this->load_position === 'timing') {
+                if ($this->load_position === 'footer') {
+                    // set load position
+                    $this->client->set_config('js', 'load_position', $this->client->config_index('key', 'footer'));
+                } elseif ($this->load_position === 'timing') {
                     
                     // add timed exec module
                     $this->client->load_module('timed-exec');
@@ -231,6 +243,39 @@ class Js extends Controller implements Controller_Interface
                 }
             }
 
+            // apply CDN
+            if ($this->options->bool('js.cdn')) {
+
+                // CDN config
+                $this->script_cdn = array(
+                    $this->options->get('js.cdn.url'),
+                    $this->options->get('js.cdn.mask')
+                );
+            } else {
+                $this->script_cdn = false;
+            }
+
+            // apply CDN to pushed assets
+            $this->http2_push_cdn = $this->options->bool('js.cdn.http2_push');
+        
+            // HTTP/2 Server Push enabled
+            if ($this->options->bool('js.http2_push.enabled') && $this->core->module_loaded('http2')) {
+                if (!$this->options->bool('js.http2_push.filter')) {
+                    $this->http2_push = true;
+                } else {
+                    $filterType = $this->options->get('js.http2_push.filter.type');
+                    $filterConfig = ($filterType) ? $this->options->get('js.http2_push.filter.' . $filterType) : false;
+
+                    if (!$filterConfig) {
+                        $this->http2_push = false;
+                    } else {
+                        $this->http2_push = array($filterType, $filterConfig);
+                    }
+                }
+            } else {
+                $this->http2_push = false;
+            }
+
             // add filter for HTML output
             add_filter('o10n_html_pre', array( $this, 'process_html' ), 10, 1);
         }
@@ -245,7 +290,7 @@ class Js extends Controller implements Controller_Interface
     final public function process_html($HTML)
     {
         // verify if empty
-        if ($HTML === '') {
+        if ($HTML === '' || !$this->env->is_optimization()) {
             return $HTML; // no HTML
         }
 
@@ -263,12 +308,12 @@ class Js extends Controller implements Controller_Interface
         // script urls
         $script_urls = array();
 
+        // client config
+        $async_scripts = array();
+
         // load async
         $async = $this->options->bool('js.async');
         if ($async) {
-
-            // client config
-            $async_scripts = array();
 
             // async load position
             $async_position = ($this->options->get('js.async.position') === 'footer') ? 'foot' : 'critical-css';
@@ -387,6 +432,11 @@ class Js extends Controller implements Controller_Interface
                                             $concat_group_settings[$concat_group]['localStorage'] = $asyncConfig['localStorage'];
                                         }
                                     }
+
+                                    // custom minifier
+                                    if (isset($asyncConfig['minifier'])) {
+                                        $concat_group_settings[$concat_group]['minifier'] = $asyncConfig['minifier'];
+                                    }
                                 } else {
 
                                     // do not load async
@@ -470,7 +520,7 @@ class Js extends Controller implements Controller_Interface
                         $script_type = 'proxy';
 
                         // script path
-                        $script_hash = str_replace('/', '', $this->cache->hash_path($script['proxy']) . substr($script['proxy'], 6));
+                        $script_hash = str_replace('/', '', $this->cache->hash_path($script['proxy'][0]) . substr($script['proxy'][0], 6));
 
                         // script url
                         $script_url = $this->url_filter($script['src']);
@@ -697,6 +747,7 @@ class Js extends Controller implements Controller_Interface
 
                     // use minify?
                     $concat_group_minify = (isset($concat_group_settings[$concat_group]['minify'])) ? $concat_group_settings[$concat_group]['minify'] : $concat_minify;
+                    $concat_group_minifier = (isset($concat_group_settings[$concat_group]['minifier'])) ? $concat_group_settings[$concat_group]['minifier'] : $this->minifier;
                     $concat_group_key = (isset($concat_group_settings[$concat_group]['group']) && isset($concat_group_settings[$concat_group]['group']['key'])) ? $concat_group_settings[$concat_group]['group']['key'] : false;
 
                     // concatenate using minify
@@ -707,7 +758,7 @@ class Js extends Controller implements Controller_Interface
 
                         // create concatenated file using minifier
                         try {
-                            $minified = $this->minify($concat_sources, $target_src_dir);
+                            $minified = $this->minify($concat_sources, $target_src_dir, $concat_group_minifier);
                         } catch (Exception $err) {
                             $minified = false;
                         }
@@ -716,31 +767,6 @@ class Js extends Controller implements Controller_Interface
                     }
 
                     if ($minified) {
-
-                        // apply filters
-                        $minified['text'] = $this->minified_css_filters($minified['text']);
-
-                        // header
-                        $minified['text'] .= "\n/* ";
-
-                        // group title
-                        if ($concat_group_settings) {
-                            if (isset($concat_group_settings[$concat_group]['title'])) {
-                                $minified['text'] .= $concat_group_settings[$concat_group]['title'] . "\n ";
-                            }
-                        }
-
-                        $minified['text'] .= "@concat";
-
-                        if ($concat_group_key) {
-                            $minified['text'] .= " " . $concat_group_key;
-                        }
-
-                        if ($this->last_used_minifier) {
-                            $minified['text'] .= " @min " . $this->last_used_minifier;
-                        }
-
-                        $minified['text'] .= " */";
 
                         // store cache file
                         $cache_file_path = $this->cache->put('js', 'concat', $urlhash, $minified['text'], $concat_group_key);
@@ -792,6 +818,9 @@ class Js extends Controller implements Controller_Interface
                 $load_timing = (isset($concat_group_settings[$concat_group]['load_timing'])) ? $concat_group_settings[$concat_group]['load_timing'] : $this->load_timing;
                 $exec_timing = (isset($concat_group_settings[$concat_group]['exec_timing'])) ? $concat_group_settings[$concat_group]['exec_timing'] : $this->exec_timing;
 
+                // concat URL
+                $script_url = $this->url_filter($this->cache->url('js', 'concat', $urlhash));
+
                 // load async (concatenated script)
                 if ($concat_group_async) {
 
@@ -817,7 +846,7 @@ class Js extends Controller implements Controller_Interface
 
                         // add to position of last script in concatenated script
                         array_splice($script_urls, $async_insert_position, 0, array(array(
-                            'url' => $this->url_filter($this->cache->url('js', 'concat', $urlhash)),
+                            'url' => $script_url,
                             'rel_preload' => $rel_preload,
                             'load_position' => $load_position,
                             'load_timing' => $load_timing,
@@ -828,9 +857,6 @@ class Js extends Controller implements Controller_Interface
                     
                     // position in document
                     $position = 'client';
-
-                    // concat URL
-                    $script_url = $this->url_filter($this->cache->url('js', 'concat', $urlhash));
 
                     // include script in HTML
                     $this->client->after($position, '<script src="'.esc_url($script_url).'"'.(($media && $media !== 'all') ? ' media="'.esc_attr($media).'"' : '').'></script>');
@@ -929,6 +955,22 @@ class Js extends Controller implements Controller_Interface
                         } else {
                             $async_script[($index + 2)] = ($script['localStorage']) ? 1 : 0;
                         }
+                        
+                        // load client module
+                        $this->client->load_module('localstorage');
+                    }
+
+                    $value_set = false;
+                    for ($i = count($async_script); $i >= $index; $i--) {
+                        if ($async_script[$i] !== null) {
+                            $value_set = true;
+                        } else {
+                            if (!$value_set) {
+                                unset($async_script[$i]);
+                            } else {
+                                $async_script[$i] = '__O10N_NULL__';
+                            }
+                        }
                     }
 
                     // add to async list
@@ -942,6 +984,16 @@ class Js extends Controller implements Controller_Interface
                 //return var_export($async_ref_list, true);
                 // add async list to client
                 $this->client->set_config('js', 'async', $async_list);
+
+                // add CDN config to client
+                if ($this->script_cdn) {
+                    $cdn_config = array();
+                    $cdn_config[$this->client->config_index('key', 'url')] = rtrim($this->script_cdn[0], '/ ');
+                    if (isset($this->script_cdn[1]) && $this->script_cdn[1]) {
+                        $cdn_config[$this->client->config_index('key', 'mask')] = $this->script_cdn[1];
+                    }
+                    $this->client->set_config('js', 'cdn', $cdn_config);
+                }
 
                 // add references
                 if ($debug) {
@@ -1108,10 +1160,7 @@ class Js extends Controller implements Controller_Interface
         // minify filter
         if ($minify && $this->options->bool('js.minify.filter')) {
             $minify_filterType = $this->options->get('js.minify.filter.type');
-            $minify_filter = $this->options->get('js.minify.filter.' . $minify_filterType);
-            if (empty($minify_filter)) {
-                $minify_filter = false;
-            }
+            $minify_filter = $this->options->get('js.minify.filter.' . $minify_filterType, array());
         } else {
             $minify_filter = false;
         }
@@ -1119,22 +1168,14 @@ class Js extends Controller implements Controller_Interface
         // async filter
         if ($async && $this->options->bool('js.async.filter')) {
             $this->async_filterType = $this->options->get('js.async.filter.type');
-            $this->async_filter = $this->options->get('js.async.filter.config');
-            if (empty($this->async_filter)) {
-                $this->async_filter = false;
-            } else {
-                //
-            }
+            $this->async_filter = $this->options->get('js.async.filter.config', array());
         } else {
             $this->async_filter = false;
         }
 
         // proxy filter
         if ($proxy) {
-            $proxy_filter = $this->options->get('js.proxy.include');
-            if (empty($proxy_filter)) {
-                $proxy_filter = false;
-            }
+            $proxy_filter = $this->options->get('js.proxy.include', array());
         } else {
             $proxy_filter = false;
         }
@@ -1147,7 +1188,7 @@ class Js extends Controller implements Controller_Interface
             foreach ($out[0] as $n => $scriptTag) {
 
                 // conditional, skip
-                if (trim($out[1][$n]) !== '') {
+                if (trim($out[1][$n]) !== '' || strpos($out[2][$n], 'data-o10n') !== false) {
                     continue 1;
                 }
 
@@ -1316,7 +1357,7 @@ class Js extends Controller implements Controller_Interface
                 }
 
                 // apply script async filter
-                if ($async && $this->async_filter) {
+                if ($async && $this->async_filter !== false) {
                     
                     // apply filter
                     $asyncConfig = $this->tools->filter_config_match($script['tag'], $this->async_filter, $this->async_filterType);
@@ -1351,11 +1392,27 @@ class Js extends Controller implements Controller_Interface
                             if (isset($asyncConfig['localStorage'])) {
                                 $script['localStorage'] = $asyncConfig['localStorage'];
                             }
+
+                            // custom minify
+                            if (isset($asyncConfig['minify'])) {
+                                $script['minify'] = $asyncConfig['minify'];
+                            }
+                            
+                            // custom minifier
+                            if (isset($asyncConfig['minifier'])) {
+                                $script['minifier'] = $asyncConfig['minifier'];
+                            }
+                        } elseif (!$asyncConfig['async']) {
+                            $script['async'] = false;
                         }
                     } elseif ($asyncConfig === true) {
 
                         // include by default
                         $script['async'] = true;
+                    } elseif (!$asyncConfig) {
+
+                        // include by default
+                        $script['async'] = false;
                     }
                 }
 
@@ -1397,12 +1454,8 @@ class Js extends Controller implements Controller_Interface
     {
         // walk extracted script elements
         foreach ($this->script_elements as $n => $script) {
+            $cache_file_hash = $proxy_file_meta = false;
 
-            // minify disabled
-            if (!isset($script['minify']) || !$script['minify']) {
-                continue;
-            }
-            
             if (isset($script['inline']) && $script['inline']) {
                 $url = 'http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://' . $_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
                 $base_href = $url;
@@ -1420,8 +1473,6 @@ class Js extends Controller implements Controller_Interface
 
                 // detect local URL
                 $local = $this->url->is_local($script['src']);
-
-                $cache_file_hash = $proxy_file_meta = false;
 
                 // local URL, verify change based on content hash
                 if ($local) {
@@ -1515,6 +1566,27 @@ class Js extends Controller implements Controller_Interface
                 }
             }
 
+            // minify disabled
+            if (!isset($script['minify']) || !$script['minify']) {
+
+                // entry
+                $this->script_elements[$n]['minified'] = array($urlhash,$file_hash);
+
+                // store stylesheet
+                $cache_file_path = $this->cache->put(
+                    'js',
+                    'src',
+                    $urlhash,
+                    $scriptText,
+                    false, // suffix
+                    false, // gzip
+                    false, // opcache
+                    $file_hash, // meta
+                    true // meta opcache
+                );
+                continue 1;
+            }
+
             // apply script filters before processing
             $scriptText = $this->js_filters($scriptText);
 
@@ -1532,7 +1604,7 @@ class Js extends Controller implements Controller_Interface
             );
 
             try {
-                $minified = $this->minify($sources, $target_src_dir);
+                $minified = $this->minify($sources, $target_src_dir, ((isset($script['minifier'])) ? $script['minifier'] : $this->minifier));
             } catch (Exception $err) {
                 // @todo
                 // handle minify failure, prevent overload
@@ -1545,12 +1617,10 @@ class Js extends Controller implements Controller_Interface
 
             // minified script
             if ($minified) {
-
-                // apply filters
-                $minified['text'] = $this->minified_css_filters($minified['text']);
-
+               
                 // footer
-                $minified['text'] .= "\n/* @src ".$script['src']." */";
+                // @todo add option to add debug information
+                //$minified['text'] .= "\n/* @src ".$script['src']." */";
 
                 if (isset($script['inline']) && $script['inline']) {
                     $this->script_elements[$n]['text'] = $minified['text'];
@@ -1606,14 +1676,9 @@ class Js extends Controller implements Controller_Interface
     /**
      * Minify scripts
      */
-    final private function minify($sources, $target)
+    final private function minify($sources, $target, $minifier)
     {
-        $this->last_used_minifier = false;
-
-        // load PHP minifier
-        if (!class_exists('\JSMin\JSMin')) {
-            require_once $this->core->modules('js')->dir_path() . 'lib/JSMin.php';
-        }
+        $this->last_used_minifier = $minifier;
 
         // concat sources
         $script = '';
@@ -1621,17 +1686,122 @@ class Js extends Controller implements Controller_Interface
             $script .= ' ' . $source['text'];
         }
 
-        // minify
-        try {
-            $minified = \JSMin\JSMin::minify($script);
-        } catch (\Exception $err) {
-            throw new Exception('PHP JSMin failed: ' . $err->getMessage(), 'js');
-        }
-        if (!$minified && $minified !== '') {
-            throw new Exception('PHP JSMin failed: unknown error', 'js');
+        // remove persistent comments
+        if ($this->options->bool('js.minify.comments.remove_important.enabled')) {
+            $script = str_replace('/*!', '/*', $script);
         }
 
-        $this->last_used_minifier = 'php';
+        switch ($minifier) {
+            case "jshrink":
+
+                // load library
+                if (!class_exists('\JShrink\Minifier')) {
+                    require_once $this->core->modules('js')->dir_path() . 'lib/JShrink.php';
+                }
+
+                // minify
+                try {
+                    $minified = \JShrink\Minifier::minify($script);
+                } catch (\Exception $err) {
+                    throw new Exception('JShrink failed: ' . $err->getMessage(), 'js');
+                }
+
+                if (!$minified && $minified !== '') {
+                    throw new Exception('JShrink failed: unknown error', 'js');
+                }
+
+            break;
+            case "closure-compiler-service":
+
+                // load library
+                if (!class_exists('\O10n\ClosureCompilerService')) {
+                    require_once $this->core->modules('js')->dir_path() . 'lib/ClosureCompilerService.php';
+                }
+                if (is_null($this->ClosureCompilerService)) {
+                    $this->ClosureCompilerService = new ClosureCompilerService;
+                }
+
+                if ($this->options->bool('js.minify.fallback.enabled')) {
+                    $timeout = $this->options->bool('js.minify.fallback.timeout');
+                    if (!$timeout || !is_numeric($timeout)) {
+                        $timeout = 60;
+                    }
+                } else {
+                    $timeout = 60;
+                }
+
+                $options = array();
+                if ($this->options->bool('js.minify.closure-compiler-service.options.compilation_level.enabled')) {
+                    $options['compilation_level'] = $this->options->get('js.minify.closure-compiler-service.options.compilation_level.level');
+                }
+
+                if ($this->options->bool('js.minify.closure-compiler-service.options.externs_url.enabled')) {
+                    $options['externs_url'] = $this->options->get('js.minify.closure-compiler-service.options.externs_url.files');
+                }
+
+                if ($this->options->bool('js.minify.closure-compiler-service.options.exclude_default_externs')) {
+                    $options['exclude_default_externs'] = true;
+                }
+
+                if ($this->options->bool('js.minify.closure-compiler-service.options.formatting.enabled')) {
+                    $options['formatting'] = $this->options->get('js.minify.closure-compiler-service.options.formatting.format');
+                }
+
+                if ($this->options->bool('js.minify.closure-compiler-service.options.use_closure_library')) {
+                    $options['use_closure_library'] = true;
+                }
+
+                // minify
+                try {
+                    $minified = $this->ClosureCompilerService->minify($script, $options, $timeout);
+                } catch (Exception $err) {
+                    if ($this->options->bool('js.minify.fallback.enabled')) {
+                        return $this->minify($sources, $target, $this->options->get('js.minify.fallback.minifier'));
+                    } else {
+                        throw new Exception('Closure Compiler failed: ' . $err->getMessage(), 'js');
+                    }
+                }
+
+                if (!$minified && $minified !== '') {
+                    throw new Exception('Closure Compiler failed: unknown error', 'js');
+                }
+
+            break;
+            case "custom":
+
+                // minify
+                try {
+                    $minified = apply_filters('o10n_js_custom_minify', $script);
+                } catch (\Exception $err) {
+                    throw new Exception('Custom Javascript minifier failed: ' . $err->getMessage(), 'js');
+                }
+
+                if (!$minified && $minified !== '') {
+                    throw new Exception('Custom Javascript minifier failed: unknown error', 'js');
+                }
+
+            break;
+            case "jsmin":
+            default:
+
+                // load library
+                if (!class_exists('\JSMin\JSMin')) {
+                    require_once $this->core->modules('js')->dir_path() . 'lib/JSMin.php';
+                }
+
+                // minify
+                try {
+                    $minified = \JSMin\JSMin::minify($script);
+                } catch (\Exception $err) {
+                    throw new Exception('PHP JSMin failed: ' . $err->getMessage(), 'js');
+                }
+                if (!$minified && $minified !== '') {
+                    throw new Exception('PHP JSMin failed: unknown error', 'js');
+                }
+
+            break;
+
+        }
 
         return array('text' => $minified);
     }
@@ -1703,46 +1873,6 @@ class Js extends Controller implements Controller_Interface
      */
     final private function url_filter($url)
     {
-        // setup global CDN
-        if (is_null($this->script_cdn)) {
-
-            // global CDN enabled
-            if ($this->options->bool('js.cdn')) {
-
-                // global CDN config
-                $this->script_cdn = array(
-                    $this->options->get('js.cdn.url'),
-                    $this->options->get('js.cdn.mask')
-                );
-            } else {
-                $this->script_cdn = false;
-            }
-
-            // apply CDN to pushed assets
-            $this->http2_push_cdn = $this->options->bool('js.cdn.http2_push');
-        }
-
-        // setup global CDN
-        if (is_null($this->http2_push)) {
-
-            // global CDN enabled
-            if ($this->options->bool('js.http2_push')) {
-                if (!$this->options->bool('js.http2_push.filter')) {
-                    $this->http2_push = true;
-                } else {
-                    $filterType = $this->options->get('js.http2_push.filter.type');
-                    $filterConfig = ($filterType) ? $this->options->get('js.http2_push.filter.' . $filterType) : false;
-
-                    if (!$filterConfig) {
-                        $this->http2_push = false;
-                    } else {
-                        $this->http2_push = array($filterType, $filterConfig);
-                    }
-                }
-            } else {
-                $this->http2_push = false;
-            }
-        }
 
         // apply HTTP/2 Server Push
         if ($this->http2_push) {
@@ -1772,22 +1902,6 @@ class Js extends Controller implements Controller_Interface
 
         // apply script CDN
         return $this->url->cdn($url, $this->script_cdn);
-    }
-
-    /**
-     * Apply filters to script before processing
-     *
-     * @param  string $script script to filter
-     * @return string Filtered script
-     */
-    final private function minified_css_filters($script)
-    {
-        // fix relative URLs
-        if (strpos($script, '../') !== false) {
-            $script = preg_replace('#\((\../)+wp-(includes|admin|content)/#', '('.$this->url->root_path().'wp-$2/', $script);
-        }
-
-        return $script;
     }
 
     /**

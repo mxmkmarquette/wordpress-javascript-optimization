@@ -62,7 +62,28 @@ class AdminMenu extends Controller implements Controller_Interface
                 $this->admin_icon(),
                 80
             );
+            add_submenu_page('o10n', __('JSON Profile Editor', 'o10n'), __('JSON Settings', 'o10n'), 'manage_options', 'o10n-settings', array(
+                 &$this->AdminView,
+                 'display'
+             ));
             remove_submenu_page('o10n', 'o10n');
+        } else {
+            add_submenu_page(
+                null,   //or 'options.php'
+               __('Performance Optimization', 'o10n'),
+                __('Optimization', 'o10n'),
+                'manage_options',
+                'o10n',
+                array(
+                    &$this->AdminView,
+                    'display'
+                )
+            );
+
+            add_submenu_page(null, __('JSON Profile Editor', 'o10n'), __('JSON Settings', 'o10n'), 'manage_options', 'o10n-settings', array(
+                 &$this->AdminView,
+                 'display'
+             ));
         }
     }
 

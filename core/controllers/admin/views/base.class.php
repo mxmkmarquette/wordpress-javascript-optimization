@@ -20,6 +20,53 @@ class AdminViewBase extends Controller implements AdminView_Controller_Interface
     protected $module_key;
     public $module; // module controller
 
+    // tab menu
+    protected $wpo_tabs = array(
+        'intro' => array(
+            'title' => '<span class="dashicons dashicons-admin-home"></span>',
+            'title_attr' => 'Intro'
+        ),
+        'settings' => array(
+            'title' => 'JSON Settings',
+            'title_attr' => 'JSON configuration profile editor',
+            'pagekey' => 'settings'
+        )
+    );
+
+    // tab menu
+    protected $wpo_module_tabs = array(
+        'html' => array(
+            'title' => 'HTML',
+            'title_attr' => 'HTML Optimization'
+        ),
+        'css' => array(
+            'title' => 'CSS',
+            'title_attr' => 'CSS Optimization'
+        ),
+        'javascript' => array(
+            'title' => 'Javascript',
+            'title_attr' => 'Javascript Optimization'
+        ),
+        'pwa' => array(
+            'title' => 'PWA / Service Worker',
+            'title_attr' => 'Progressive Web App Optimization'
+        ),
+        'fonts' => array(
+            'title' => 'Fonts',
+            'title_attr' => 'Webfonts Optimization'
+        ),
+        'http2' => array(
+            'title' => 'HTTP/2',
+            'title_attr' => 'HTTP/2 Optimization'
+        ),
+        'security' => array(
+            'title' => 'Security',
+            'title_attr' => 'Security Optimization'
+        )
+    );
+
+    //$modules = array('html','css','javascript','pwa','webfonts','http2','security');
+
     /**
      * Load controller
      *
@@ -50,6 +97,18 @@ class AdminViewBase extends Controller implements AdminView_Controller_Interface
         if (!empty($this->module_key)) {
             $this->module = & $this->core->modules($this->module_key);
         }
+
+        $multiple_installed = (count($this->core->modules()) > 1);
+
+        foreach ($this->wpo_module_tabs as $module => $settings) {
+            if ($this->core->module_loaded($module)) {
+                $settings['base'] = ($multiple_installed) ? 'admin.php' : $this->core->modules($module)->admin_base();
+                $settings['pagekey'] = $module;
+            } else {
+                $settings['href'] = add_query_arg(array('s' => 'o10n', 'tab' => 'search', 'type' => 'author'), admin_url('plugin-install.php'));
+            }
+            $this->wpo_tabs[$module] = $settings;
+        }
     }
 
     /**
@@ -78,9 +137,7 @@ class AdminViewBase extends Controller implements AdminView_Controller_Interface
     {
 
         // WPO plugin
-        if (defined('O10N_WPO_VERSION')) {
-            return $this->core->modules('wpo')->admin_base();
-        } elseif (!empty($this->module_key)) {
+        if (!empty($this->module_key)) {
             return $this->core->modules($this->module_key)->admin_base();
         } else {
             return 'admin.php';
@@ -96,12 +153,10 @@ class AdminViewBase extends Controller implements AdminView_Controller_Interface
     {
 
         // WPO plugin
-        if (defined('O10N_WPO_VERSION')) {
-            return $this->core->modules('wpo')->admin_tabs();
-        } elseif (!empty($this->module_key)) {
+        if (!empty($this->module_key)) {
             return $this->core->modules($this->module_key)->admin_tabs();
         } else {
-            return array();
+            return $this->wpo_tabs;
         }
     }
 
@@ -120,12 +175,12 @@ class AdminViewBase extends Controller implements AdminView_Controller_Interface
         }
 
         // WPO plugin
-        if (defined('O10N_WPO_VERSION')) {
+        if (empty($this->module_key)) {
 
             // extract tab from page
             $base = 'o10n';
-            $active_tab = ($_GET['page'] === 'o10n') ? 'intro' : substr($_GET['page'], 5);
-            $active_subtab = (isset($_GET['tab']))? $_GET['tab'] : false;
+            $active_tab = (isset($_GET['tab']))? $_GET['tab'] : false;
+            $active_subtab = (isset($_GET['subtab']))? $_GET['subtab'] : false;
         } else {
             $base = 'o10n-' . $this->module_key;
             $active_tab = (isset($_GET['tab']))? $_GET['tab'] : 'intro';

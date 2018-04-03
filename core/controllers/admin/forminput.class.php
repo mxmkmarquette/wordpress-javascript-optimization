@@ -41,12 +41,19 @@ class AdminForminput extends Controller implements Controller_Interface
      */
     protected function setup()
     {
+    }
+
+    /**
+     * Load post data
+     */
+    final public function load_post()
+    {
         if (!isset($_POST['o10n'])) {
             return;
         }
-
+        
         // @link https://codex.wordpress.org/Function_Reference/stripslashes_deep
-        $this->input = array_map('stripslashes_deep', $_POST['o10n']);
+        $this->input = stripslashes_deep($_POST['o10n']);
         if (!is_array($this->input)) {
             $this->input = array();
         }
@@ -191,12 +198,11 @@ class AdminForminput extends Controller implements Controller_Interface
                 break;
                 case "json":
                 case "json-array":
-                    if (isset($this->input[$path])) {
+                    if (isset($this->input[$path]) && trim($this->input[$path]) !== '') {
                         try {
                             $this->verified_input[$path] = $this->json->parse($this->input[$path], true);
                         } catch (\Exception $e) {
-                            die(htmlentities($this->input[$path]));
-                            $this->error($path, $e->getMessage());
+                            $this->error($path, $e->getMessage() . ' <pre>'.htmlentities($this->input[$path], ENT_COMPAT, 'utf-8').'</pre>');
                             $this->verified_input[$path] = (($type === 'json') ? json_decode('{}') : array());
                         }
                     } else {

@@ -10,8 +10,14 @@
             "type": "boolean",
             "default": false
         },
+        "minifier": {
+            "$ref": "css-minify.json#/definitions/minifiers"
+        },
         "cssmin": {
             "$ref": "css-cssmin.json#"
+        },
+        "yui": {
+            "$ref": "css-yui.json#"
         },
         "rebase": {
             "title": "Rebase relative URIs in CSS",
@@ -19,6 +25,18 @@
             "properties": {
                 "enabled": {
                     "title": "Rebase relative URIs in CSS",
+                    "type": "boolean",
+                    "default": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "ignore_errors": {
+            "title": "Ignore CSS parser errors",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "title": "Ignore CssMin.php errors",
                     "type": "boolean",
                     "default": false
                 }
@@ -211,6 +229,9 @@
                                         "type": "boolean",
                                         "default": true
                                     },
+                                    "minifier": {
+                                        "$ref": "css-minify.json#/definitions/minifiers"
+                                    },
                                     "exclude": {
                                         "title": "Exclude from concatenation",
                                         "type": "boolean",
@@ -384,5 +405,19 @@
             }]
         }
     },
-    "additionalProperties": false
+    "additionalProperties": false,
+
+    "definitions": {
+        "minifiers": {
+            "title": "Minifier to use for minification",
+            "type": "string",
+            "enum": [
+                "cssmin",
+                "yui",
+                "regex",
+                "custom"
+            ],
+            "default": "cssmin"
+        }
+    }
 }

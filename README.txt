@@ -5,7 +5,7 @@ Tags: javascript, minify, async, uglifyjs, concat, beautify, js, compress, compr
 Requires at least: 4.0
 Requires PHP: 5.4
 Tested up to: 4.9.4
-Stable tag: 0.0.25
+Stable tag: 0.0.48
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,66 +49,36 @@ Documentation is available on [Github](https://github.com/o10n-x/wordpress-javas
 
 == Changelog ==
 
-= 0.0.25 =
-* Bugfix: External script proxy capture client not compatible with regex match.
-* Added: proxy capture example.
+= 0.0.48 =
+* Added: plugin update protection (plugin index).
 
-= 0.0.24 =
+= 0.0.47 =
+* Added: Proxy option to delete or rewrite script-injected scripts ([@cwfaraday](https://wordpress.org/support/topic/emoji-js-isnt-handled/)).
+
+= 0.0.46 =
 * Core update (see changelog.txt)
 
-= 0.0.23 =
-* Added: JSON profile editor (backup and restore plugin config)
+= 0.0.45 =
+* Added: support for multiple Javascript minifiers.
+* Added: [Google Closure Compiler Service](https://developers.google.com/closure/compiler/)
+* Added: Custom minifier option (support for Node.js, server software etc.)
+* Added: Option to disable minification for individual scripts in async config filter (`"minify": false`)
+* Added: Option to set minifier for individual scripts or concat groups in async config filter and concat group config.
 
-= 0.0.22 =
-* Improved inline script minification and concatenation.
+= 0.0.44 =
+* Core update (see changelog.txt)
 
-= 0.0.21 =
-* Bugfix: ignore scripts with invalid MIME type.
+= 0.0.43 =
+* Bugfix: HTTP/2 Server Push applied when HTTP/2 Optimization plugin is disabled.
+* Bugfix: Async loaded concatenated scripts not pushed by HTTP/2 Server Push.
 
-= 0.0.20 =
-* Bugfix: ignore scripts with invalid MIME type.
+= 0.0.42 =
+* Core update (see changelog.txt)
 
-= 0.0.19 =
-* Bugfix: removed incorrect plugin index file.
+= 0.0.40 =
+* Bugfix: editor theme not loading after `wp_add_inline_script` update.
 
-= 0.0.18 =
-Core update (see changelog.txt)
-
-= 0.0.15 =
-* Removed invalid plugin file.
-
-= 0.0.14 =
-* Temporarily removed lazy loading scripts (under construction)
-
-= 0.0.13 =
-* Bugfix: uninstaller.
-
-= 0.0.12 =
-Publication on WordPress.
-
-= 0.0.11 =
-Bugfix: settings link on plugin index.
-
-= 0.0.10 =
-Core update (see changelog.txt)
-
-= 0.0.8 =
-Bugfix: Timed loading/exec not working on iphone when using localStorage.
-
-= 0.0.7 =
-Bugfix: timed render not configured correctly (this plugin is a prototype copied partly from the CSS optimization plugin, the client should now perform correctly).
-
-= 0.0.3 =
-
-Added: cache management in admin menu.
-
-= 0.0.2 = 
-
-Bugfix/improvement: Async Config Filter load and render timing.
-
-= 0.0.1 =
-
-Beta release. Please provide feedback on [Github forum](https://github.com/o10n-x/wordpress-javascript-optimization/issues).
+See changelog.txt for older updates.
 
 == Upgrade Notice ==
 
