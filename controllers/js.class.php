@@ -1942,7 +1942,7 @@ class Js extends Controller implements Controller_Interface
     final public function sanitize_filter($concat_filter)
     {
         if (!is_array($concat_filter) || empty($concat_filter)) {
-            $concat_filter = false;
+            $concat_filter = array();
         }
 
         // sanitize groups by key reference
