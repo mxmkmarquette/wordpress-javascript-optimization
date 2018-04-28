@@ -5,7 +5,7 @@ Tags: javascript, minify, async, uglifyjs, concat, beautify, js, compress, compr
 Requires at least: 4.0
 Requires PHP: 5.4
 Tested up to: 4.9.4
-Stable tag: 0.0.50
+Stable tag: 0.0.51
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ Documentation is available on [Github](https://github.com/o10n-x/wordpress-javas
 
 
 == Changelog ==
+
+= 0.0.51 =
+* Bugfix: Code search & replace regex option not working.
 
 = 0.0.50 =
 * Improved: plugin index.

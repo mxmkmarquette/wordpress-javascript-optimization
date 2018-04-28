@@ -255,8 +255,8 @@ submit_button(__('Save'), 'primary large', 'is_submit', false);
     <tr valign="top" data-ns="js.minify"<?php $visible('js.minify');  ?>>
         <th scope="row">Search &amp; Replace</th>
         <td>
-            <div id="js_search_replace"><div class="loading-json-editor"><?php print __('Loading JSON editor...', 'optimization'); ?></div></div>
-            <input type="hidden" id="js_search_replace_src" name="o10n[js.replace]" data-json-type="json-array" value="<?php print esc_attr($json('js.replace')); ?>" />
+            <div id="js-replace"><div class="loading-json-editor"><?php print __('Loading JSON editor...', 'optimization'); ?></div></div>
+            <input type="hidden" id="js_search_replace_src" name="o10n[js.replace]" data-json-type="json-array" data-json-editor-height="auto" data-json-editor-init="1" value="<?php print esc_attr($json('js.replace')); ?>" />
 
             <p class="description">This option enables to replace strings in the javascript code <strong>before</strong> minification. Enter a JSON array with configuration objects <span class="dashicons dashicons-editor-help"></span>.</p>
 

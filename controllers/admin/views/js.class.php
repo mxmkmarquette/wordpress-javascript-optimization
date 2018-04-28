@@ -248,7 +248,11 @@ class AdminViewJs extends AdminViewBase
                             $position++;
                             if (isset($cnf['regex'])) {
                                 // exec preg_match on null
-                                $valid = @preg_match($cnf['search'], null);
+                                try {
+                                    $valid = @preg_match($cnf['search'], null);
+                                } catch (\Exception $err) {
+                                    $valid = false;
+                                }
                                 $error = $this->is_preg_error();
                                 if ($valid === false || $error) {
                                     throw new Exception('<code>'.esc_html($cnf['search']).'</code> is an invalid regular expression and has been removed.' . (($error) ? '<br /><p>Error: '.$error.'</p>' : ''), 'settings');
@@ -467,5 +471,31 @@ class AdminViewJs extends AdminViewBase
                 throw new Exception('Invalid Javascript view ' . esc_html($tab), 'core');
             break;
         }
+    }
+
+    /**
+     * Preg error
+     */
+    public function is_preg_error()
+    {
+        if (!function_exists('preg_last_error')) {
+            return false;
+        }
+        $error = preg_last_error();
+
+        // no error
+        if ($error === PREG_NO_ERROR) {
+            return false;
+        }
+
+        $errors = array(
+            PREG_INTERNAL_ERROR => 'Code 1 : There was an internal PCRE error',
+            PREG_BACKTRACK_LIMIT_ERROR => 'Code 2 : Backtrack limit was exhausted',
+            PREG_RECURSION_LIMIT_ERROR => 'Code 3 : Recursion limit was exhausted',
+            PREG_BAD_UTF8_ERROR => 'Code 4 : The offset didn\'t correspond to the begin of a valid UTF-8 code point',
+            PREG_BAD_UTF8_OFFSET_ERROR => 'Code 5 : Malformed UTF-8 data',
+        );
+
+        return $errors[$error];
     }
 }
