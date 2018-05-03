@@ -12,7 +12,7 @@ namespace O10n;
  * @wordpress-plugin
  * Plugin Name:       Javascript Optimization
  * Description:       Advanced Javascript optimization toolkit. Minify, concat/merge, async loading, advanced editor, ES Lint, UglifyJS (professional), beautifier, HTTP/2 Server Push and more.
- * Version:           0.0.52
+ * Version:           0.0.53
  * Author:            Optimization.Team
  * Author URI:        https://optimization.team/
  * GitHub Plugin URI: https://github.com/o10n-x/wordpress-javascript-optimization
@@ -30,7 +30,7 @@ if (defined('WP_INSTALLING') && WP_INSTALLING) {
 }
 
 // settings
-$module_version = '0.0.52';
+$module_version = '0.0.53';
 $minimum_core_version = '0.0.38';
 $plugin_path = dirname(__FILE__);
 
@@ -67,7 +67,7 @@ new Module(
             'path' => 'js/src/',
             'file_ext' => '.js',
             'alt_exts' => array('.js.map'),
-            'expire' => 259200 // expire after 3 days
+            'expire' => false // @todo 259200 // expire after 3 days
         ),
         'concat' => array(
             'hash_id' => true, // store data by database index id
@@ -75,12 +75,12 @@ new Module(
             'id_dir' => 'js/',
             'file_ext' => '.js',
             'alt_exts' => array('.js.map'),
-            'expire' => 86400 // expire after 1 day
+            'expire' => false // @todo 86400 // expire after 1 day
         ),
         'proxy' => array(
             'path' => 'js/proxy/',
             'file_ext' => '.js',
-            'expire' => 86400 // expire after 1 day
+            'expire' => false // @todo 86400 // expire after 1 day
         )
     ),
     __FILE__
