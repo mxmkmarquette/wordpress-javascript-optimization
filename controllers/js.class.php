@@ -623,7 +623,7 @@ class Js extends Controller implements Controller_Interface
                 $async_insert_position++;
 
                 // calcualte hash from source files
-                $urlhash = md5(implode('|xx', $concat_hashes));
+                $urlhash = md5(implode('|', $concat_hashes));
 
                 // load from cache
                 if ($this->cache->exists('js', 'concat', $urlhash)) {
@@ -1237,7 +1237,6 @@ class Js extends Controller implements Controller_Interface
                         $script['text'] = $text;
                     }
                 } elseif ($concat_inline && $text) {
-                    $textx = $text;
 
                     // inline script
 
@@ -1492,7 +1491,7 @@ class Js extends Controller implements Controller_Interface
                         // verify content
                         $proxy_file_meta = $this->proxy->meta('js', $script['src']);
                         $cache_file_hash = $this->cache->meta('js', 'src', $urlhash, true);
-
+ 
                         if ($proxy_file_meta && $cache_file_hash && $proxy_file_meta[2] === $cache_file_hash) {
 
                             // preserve cache file based on access
@@ -1537,6 +1536,10 @@ class Js extends Controller implements Controller_Interface
 
                 // add minified path
                 $this->script_elements[$n]['minified'] = array($urlhash, $file_hash);
+                
+                if (isset($script['inline']) && $script['inline']) {
+                    $this->script_elements[$n]['text'] = $this->cache->get('js', 'src', $urlhash);
+                }
 
                 continue 1;
             }
