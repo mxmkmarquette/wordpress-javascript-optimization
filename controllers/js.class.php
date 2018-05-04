@@ -452,6 +452,11 @@ class Js extends Controller implements Controller_Interface
                                         }
                                     }
 
+                                    // dependency
+                                    if (isset($asyncConfig['dependency']) && $asyncConfig['dependency']) {
+                                        $concat_group_settings[$concat_group]['dependency'] = $asyncConfig['dependency'];
+                                    }
+
                                     // custom minifier
                                     if (isset($asyncConfig['minifier'])) {
                                         $concat_group_settings[$concat_group]['minifier'] = $asyncConfig['minifier'];
@@ -564,6 +569,9 @@ class Js extends Controller implements Controller_Interface
                 );
                 if (isset($script['localStorage'])) {
                     $async_script['localStorage'] = $script['localStorage'];
+                }
+                if (isset($script['dependency'])) {
+                    $async_script['dependency'] = $script['dependency'];
                 }
                 $async_scripts[] = $async_script;
 
@@ -856,6 +864,9 @@ class Js extends Controller implements Controller_Interface
                     if (isset($concat_group_settings[$concat_group]['localStorage'])) {
                         $async_script['localStorage'] = $concat_group_settings[$concat_group]['localStorage'];
                     }
+                    if (isset($concat_group_settings[$concat_group]['dependency'])) {
+                        $async_script['dependency'] = $concat_group_settings[$concat_group]['dependency'];
+                    }
 
                     // add to position of last script in concatenated script
                     array_splice($async_scripts, $async_insert_position, 0, array($async_script));
@@ -942,6 +953,7 @@ class Js extends Controller implements Controller_Interface
                     $async_script[] = null; // load position
                     $async_script[] = null; // render timing
                     $async_script[] = null; // localStorage
+                    $async_script[] = null; // dependency
 
                     // load config
                     if ($load_position) {
@@ -977,6 +989,11 @@ class Js extends Controller implements Controller_Interface
                         
                         // load client module
                         $this->client->load_module('localstorage');
+                    }
+
+                    // dependency
+                    if (isset($script['dependency'])) {
+                        $async_script[($index + 3)] = $script['dependency'];
                     }
 
                     $value_set = false;
@@ -1409,6 +1426,11 @@ class Js extends Controller implements Controller_Interface
                             // custom localStorage
                             if (isset($asyncConfig['localStorage'])) {
                                 $script['localStorage'] = $asyncConfig['localStorage'];
+                            }
+
+                            // dependency
+                            if (isset($asyncConfig['dependency'])) {
+                                $script['dependency'] = $asyncConfig['dependency'];
                             }
 
                             // custom minify
