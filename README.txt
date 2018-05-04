@@ -5,7 +5,7 @@ Tags: javascript, minify, async, uglifyjs, concat, beautify, js, compress, compr
 Requires at least: 4.0
 Requires PHP: 5.4
 Tested up to: 4.9.4
-Stable tag: 0.0.54
+Stable tag: 0.0.55
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ Documentation is available on [Github](https://github.com/o10n-x/wordpress-javas
 
 
 == Changelog ==
+
+= 0.0.55 =
+* Added: Service Worker push option.
 
 = 0.0.54 =
 * Bugfix: inline script concatenation does not use minified script text.

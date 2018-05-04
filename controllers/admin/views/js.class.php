@@ -283,6 +283,8 @@ class AdminViewJs extends AdminViewBase
 
                     'js.http2_push.enabled' => 'bool',
 
+                    'js.sw_push.enabled' => 'bool',
+
                     'js.proxy.enabled' => 'bool',
 
                     'js.cdn.enabled' => 'bool'
@@ -396,6 +398,15 @@ class AdminViewJs extends AdminViewBase
                         'js.http2_push.filter.type' => 'string',
                         'js.http2_push.filter.include' => 'newline_array',
                         'js.http2_push.filter.exclude' => 'newline_array'
+                    ));
+                }
+
+                // Service Worker Push
+                if ($forminput->bool('js.sw_push.filter.enabled')) {
+                    $forminput->type_verify(array(
+                        'js.sw_push.filter.type' => 'string',
+                        'js.sw_push.filter.include' => 'newline_array',
+                        'js.sw_push.filter.exclude' => 'newline_array'
                     ));
                 }
 

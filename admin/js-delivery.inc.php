@@ -235,7 +235,7 @@ submit_button(__('Save'), 'primary large', 'is_submit', false);
         <td>
         <?php if (!$module_loaded('http2')) {
     ?>
-<p class="description">Install the <a href="<?php print esc_url(add_query_arg(array('s' => 'o10n', 'tab' => 'search', 'type' => 'author'), admin_url('plugin-install.php'))); ?>">HTTP/2 Optimization</a> plugin to use this feature.</p>
+<p class="description">Install the <a href="https://github.com/o10n-x/wordpress-http2-optimization" target="_blank">HTTP/2 Optimization</a> plugin to use this feature.</p>
 <?php
 } else {
         ?>
@@ -276,6 +276,51 @@ submit_button(__('Save'), 'primary large', 'is_submit', false);
         <td style="padding-top:0px;">
             <h5 class="h">&nbsp;HTTP/2 Server Push Exclude List</h5>
             <textarea class="json-array-lines" name="o10n[js.http2_push.filter.exclude]" data-json-type="json-array-lines"><?php $line_array('js.http2_push.filter.exclude'); ?></textarea>
+            <p class="description">Enter (parts of) <code>&lt;script&gt;</code> elements to exclude from being pushed. One match string per line.</p>
+        </td>
+    </tr>
+
+    <tr valign="top">
+        <th scope="row">Service Worker Push</th>
+        <td>
+        <?php if (!$module_loaded('pwa')) {
+    ?>
+<p class="description">Install the <a href="https://github.com/o10n-x/wordpress-pwa-optimization" target="_blank">Service Worker (PWA) Optimization</a> plugin to use this feature.</p>
+<?php
+} else {
+        ?>
+            <label><input type="checkbox" name="o10n[js.sw_push.enabled]" data-json-ns="1" value="1"<?php $checked('js.sw_push.enabled'); ?> /> Enabled</label>
+            <p class="description">When enabled, scripts are attached to a page using <code>O10n\attach_preload()</code> and are automatically preloaded when a page is preloaded in the Service Worker, achieving a similar result as HTTP/2 Server Push + Cache-Digest.</p>
+
+            <div data-ns="js.sw_push"<?php $visible('js.sw_push'); ?>>
+               
+                <label><input type="checkbox" value="1" name="o10n[js.sw_push.filter.enabled]" data-json-ns="1"<?php $checked('js.sw_push.filter.enabled'); ?> /> Enable filter</label>
+                <span data-ns="js.sw_push.filter"<?php $visible('js.sw_push.filter'); ?>>
+                    <select name="o10n[js.sw_push.filter.type]" data-ns-change="js.sw_push.filter" data-json-default="<?php print esc_attr(json_encode('include')); ?>">
+                        <option value="include"<?php $selected('js.sw_push.filter.type', 'include'); ?>>Include List</option>
+                        <option value="exclude"<?php $selected('js.sw_push.filter.type', 'exclude'); ?>>Exclude List</option>
+                    </select>
+                </span>
+            </div>
+<?php
+    }
+?>
+        </td>
+    </tr>
+    
+    <tr valign="top" data-ns="js.sw_push.filter"<?php $visible('js.sw_push.filter', ($get('js.sw_push.filter.type') === 'include'));  ?> data-ns-condition="js.sw_push.filter.type==include">
+        <th scope="row">&nbsp;</th>
+        <td style="padding-top:0px;">
+            <h5 class="h">&nbsp;Service Worker Push Include List</h5>
+            <textarea class="json-array-lines" name="o10n[js.sw_push.filter.include]" data-json-type="json-array-lines" placeholder="Leave blank to push all scripts..."><?php $line_array('js.sw_push.filter.include'); ?></textarea>
+            <p class="description">Enter (parts of) <code>&lt;script&gt;</code> elements to push, e.g. <code>jquery.js</code> or <code>id="script"</code>. One match string per line.</p>
+        </td>
+    </tr>
+    <tr valign="top" data-ns="js.sw_push.filter"<?php $visible('js.sw_push.filter', ($get('js.sw_push.filter.type') === 'exclude'));  ?> data-ns-condition="js.sw_push.filter.type==exclude">
+        <th scope="row">&nbsp;</th>
+        <td style="padding-top:0px;">
+            <h5 class="h">&nbsp;Service Worker Push Exclude List</h5>
+            <textarea class="json-array-lines" name="o10n[js.sw_push.filter.exclude]" data-json-type="json-array-lines"><?php $line_array('js.sw_push.filter.exclude'); ?></textarea>
             <p class="description">Enter (parts of) <code>&lt;script&gt;</code> elements to exclude from being pushed. One match string per line.</p>
         </td>
     </tr>
