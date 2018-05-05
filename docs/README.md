@@ -21,7 +21,7 @@ Javascript code optimization consists of two main parts: minification and concat
 
 ## Javascript Minify
 
-The plugin provides the option to minify Javascript code using multiple Javascript minifiers including [JSMin](https://github.com/mrclay/jsmin-php) (PHP), [Google Closure Compiler API](https://github.com/google/closure-compiler) and the option to use a custom minifier using a WordPress filter that enables to use any solution, including a Amazon Lambda or Google Cloud function with Node.js based CSS optimization software.
+The plugin provides the option to minify Javascript code using multiple Javascript minifiers including [JSMin](https://github.com/mrclay/jsmin-php) (PHP), [Google Closure Compiler API](https://github.com/google/closure-compiler) and the option to use a custom minifier using a WordPress filter that enables to use any solution, including a Amazon Lambda or Google Cloud function with Node.js based Javascript optimization software.
 
 You can control which scripts are included in the minification by enabling the filter option. 
 

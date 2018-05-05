@@ -56,7 +56,7 @@ This plugin is a toolkit for professional Javascript optimization.
 
 The plugin provides in a complete solution for code optimization and delivery optimization (minify, concat/merge (with groups), async loading, timed execution and more).
 
-The plugin provides the option to minify Javascript code using multiple Javascript minifiers including [JSMin](https://github.com/mrclay/jsmin-php) (PHP), [Google Closure Compiler API](https://github.com/google/closure-compiler) and the option to use a custom minifier using a WordPress filter that enables to use any solution, including a Amazon Lambda or Google Cloud function with Node.js based CSS optimization software.
+The plugin provides the option to minify Javascript code using multiple Javascript minifiers including [JSMin](https://github.com/mrclay/jsmin-php) (PHP), [Google Closure Compiler API](https://github.com/google/closure-compiler) and the option to use a custom minifier using a WordPress filter that enables to use any solution, including a Amazon Lambda or Google Cloud function with Node.js based Javascript optimization software.
 
 The plugin provides many unique innovations including timed script downloading and/or execution based on `requestAnimationFrame` with frame target, `requestIdleCallback`, element scrolled into view or a Media Query.
 
