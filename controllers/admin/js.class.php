@@ -52,7 +52,7 @@ class AdminJs extends ModuleAdminController implements Module_Admin_Controller_I
             )
         ),
         'settings' => array(
-            'title' => 'Settings'
+            'title' => 'JSON'
         )
     );
 
