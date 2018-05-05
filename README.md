@@ -69,13 +69,3 @@ The plugin contains an advanced Javascript editor with ES Lint, UglifyJS code op
 ![Advanced Javascript Editor](https://github.com/o10n-x/wordpress-javascript-optimization/blob/master/docs/images/js-editor.png)
 
 Additional features can be requested on the [Github forum](https://github.com/o10n-x/wordpress-javascript-optimization/issues).
-
-## Changelog
-
-#### 0.0.1
-
-Beta release. Please provide feedback on [Github forum](https://github.com/o10n-x/wordpress-javascript-optimization/issues).
-
-## Upgrade Notice
-
-None.
