@@ -33,7 +33,7 @@ The filter list accepts parts of HTML script elements which makes it possible to
 
 #### Custom Javascript minifier
 
-The Custom Minifier option enables to use any Javascript minifier via the WordPress filter hook `o10n_css_custom_minify`.
+The Custom Minifier option enables to use any Javascript minifier via the WordPress filter hook `o10n_js_custom_minify`.
 
 ```php
 /* Custom Javascript minifier */
@@ -65,7 +65,7 @@ The group filter enables to create bundles of scripts. The configuration is an a
 
 `match` is an array with strings or JSON objects. The JSON object format contains the required property `string` (match string) and optional properties `regex` (boolean to enable regular expression match) and `exclude` (exclude from group). The match list determines which scripts are included in the group.
 
-`group` is an object with the required properties `title` and `key` and the optional property `id` (an HTML attribute ID to add to the script element). The `key` property is used in the file path which enables to recognize the concat group source file, e.g. `/cache/o10n/css/concat/1:group-key.css`. 
+`group` is an object with the required properties `title` and `key` and the optional property `id` (an HTML attribute ID to add to the script element). The `key` property is used in the file path which enables to recognize the concat group source file, e.g. `/cache/o10n/js/concat/1:group-key.js`. 
 
 `minify` is a boolean that enables or disables the PHP minifier for concatenation.
 
@@ -329,11 +329,11 @@ Exec timing differs from load timing as it only affects the actual script execut
 	"config": {
         "type": "array",
         "items": {
-            "title": "Stylesheet filter configuration",
+            "title": "Script filter configuration",
             "type": "object",
             "properties": {
                 "match": {
-                    "title": "A string or regular expression to match a stylesheet URL or group key.",
+                    "title": "A string or regular expression to match a script URL or group key.",
                     "type": "string",
                     "minLength": 1
                 },
@@ -344,36 +344,29 @@ Exec timing differs from load timing as it only affects the actual script execut
                         true
                     ]
                 },
-                "media": {
-                    "title": "Apply custom media query for responsive preloading.",
-                    "type": "string",
-                    "minLength": 1
-                },
                 "async": {
-                    "title": "Load stylesheet async (include/exclude)",
+                    "title": "Load script async (include/exclude)",
                     "type": "boolean",
                     "default": true
                 },
                 "minify": {
-                    "title": "Minify stylesheet",
+                    "title": "Minify script",
                     "type": "boolean",
                     "default": true
                 },
                 "minifier": {
-                    "$ref": "css-minify.json#/definitions/minifiers"
+                    "$ref": "js-minify.json#/definitions/minifiers"
+                },
+                "fallback_minifier": {
+                    "$ref": "js-minify.json#/definitions/fallback_minifier"
                 },
                 "rel_preload": {
-                    "title": "Load stylesheet using rel=preload",
-                    "type": "boolean",
-                    "default": false
-                },
-                "noscript": {
-                    "title": "Add fallback stylesheets via <noscript>",
+                    "title": "Load script using rel=preload",
                     "type": "boolean",
                     "default": false
                 },
                 "load_position": {
-                    "title": "Load position of CSS",
+                    "title": "Load position of scripts",
                     "type": "string",
                     "enum": ["header", "footer", "timing"],
                     "default": "header"
@@ -381,18 +374,34 @@ Exec timing differs from load timing as it only affects the actual script execut
                 "load_timing": {
                     "$ref": "timed-exec.json#/definitions/timingMethods"
                 },
-                "render_timing": {
+                "exec_timing": {
                     "$ref": "timed-exec.json#/definitions/timingMethods"
                 },
+                "dependency": {
+                    "title": "Dependency configuration",
+                    "oneOf": [{
+                        "title": "A string to match a script URL or contact group key.",
+                        "type": "string",
+                        "minLength": 1
+                    }, {
+                        "title": "An array of script URLs or contact group keys.",
+                        "type": "array",
+                        "items": {
+                            "title": "A string to match a script URL or contact group key.",
+                            "type": "string"
+                        },
+                        "uniqueItems": true
+                    }]
+                },
                 "localStorage": {
-                    "title": "Override stylesheet cache configuration",
+                    "title": "Override script cache configuration",
                     "oneOf": [{
                         "type": "boolean"
                     }, {
                         "type": "object",
                         "properties": {
                             "max_size": {
-                                "title": "Maximum size of stylesheet to store in cache.",
+                                "title": "Maximum size of script to store in cache.",
                                 "type": "number",
                                 "minimum": 1
                             },
