@@ -383,9 +383,9 @@ class AdminViewJs extends AdminViewBase
                     // localStorage
                     if ($forminput->bool('js.async.localStorage.enabled')) {
                         $forminput->type_verify(array(
-                            'js.async.localStorage.max_size' => 'int',
-                            'js.async.localStorage.expire' => 'int',
-                            'js.async.localStorage.update_interval' => 'int',
+                            'js.async.localStorage.max_size' => 'int-empty',
+                            'js.async.localStorage.expire' => 'int-empty',
+                            'js.async.localStorage.update_interval' => 'int-empty',
                             'js.async.localStorage.head_update' => 'bool'
                         ));
                     }

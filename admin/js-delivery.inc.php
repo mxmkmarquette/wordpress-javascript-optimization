@@ -290,7 +290,7 @@ submit_button(__('Save'), 'primary large', 'is_submit', false);
 } else {
         ?>
             <label><input type="checkbox" name="o10n[js.sw_push.enabled]" data-json-ns="1" value="1"<?php $checked('js.sw_push.enabled'); ?> /> Enabled</label>
-            <p class="description">When enabled, scripts are attached to a page using <code>O10n\attach_preload()</code> and are automatically preloaded when a page is preloaded in the Service Worker, achieving a similar result as HTTP/2 Server Push + Cache-Digest.</p>
+            <p class="description">When enabled, scripts are attached to a page using <code>\O10n\attach_preload()</code> and are automatically preloaded when a page is preloaded in the Service Worker, achieving a similar result as HTTP/2 Server Push + Cache-Digest.</p>
 
             <div data-ns="js.sw_push"<?php $visible('js.sw_push'); ?>>
                
