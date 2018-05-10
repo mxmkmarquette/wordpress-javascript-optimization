@@ -39,7 +39,7 @@ if (!class_exists('\O10n\Module')) {
     require $plugin_path . '/core/controllers/module.php';
 }
 
-// load module
+//  load module
 new Module(
     'js',
     'Javascript Optimization',
