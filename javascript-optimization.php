@@ -29,7 +29,7 @@ if (defined('WP_INSTALLING') && WP_INSTALLING) {
     return;
 }
 
-// settings
+//  settings
 $module_version = '0.0.59';
 $minimum_core_version = '0.0.45';
 $plugin_path = dirname(__FILE__);
@@ -39,7 +39,7 @@ if (!class_exists('\O10n\Module')) {
     require $plugin_path . '/core/controllers/module.php';
 }
 
-//  load module
+// load module
 new Module(
     'js',
     'Javascript Optimization',
