@@ -5,7 +5,7 @@ Tags: javascript, minify, async, uglifyjs, concat, beautify, js, compress, compr
 Requires at least: 4.0
 Requires PHP: 5.4
 Tested up to: 4.9.4
-Stable tag: 0.0.59
+Stable tag: 0.0.60
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
